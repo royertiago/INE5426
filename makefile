@@ -11,13 +11,16 @@ a.out: $(OBJ)
 	$(CXX) $^
 
 $(OBJDEPS): %.d : %.cpp
-	g++ -std=c++0x -MM $< -MF $@ -MT "$*.o $*.d" $(LIBS)
+	g++ -std=c++0x -MM $< -MF $@ -MT "$*.o $*.d" $(ILIBS)
 
 $(OBJ): %.o : %.cpp makefile
 	$(CXX) $(CXXFLAGS) $(ILIBS) -c $< -o $@
 
 include $(OBJDEPS)
 
-.PHONY: clean
+.PHONY: clean veryclean
 clean:
 	-rm $(OBJ) $(OBJDEPS)
+
+veryclean: clean
+	-rm a.out
