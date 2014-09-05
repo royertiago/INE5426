@@ -16,7 +16,7 @@ f
 A última linha não é um comentário.
 fx " Este trecho está correto, podemos ter \n numa string.
 "f "
-    """ "Aqui, deve ser mais uma string. Entretanto, a próxima linha é comentário:"
+    ""\"\"\\"" "Aqui, deve ser mais uma string. Entretanto, a próxima linha é comentário:"
 "Isto é comentário. A propósito, aquele 'f' é um identificador, não uma função. "
 fy
 As próximas linhas, em branco, devem ser ignoradas:
@@ -32,4 +32,4 @@ Operador >
     >
 
 f 100 main
-    print "Hello, World!"
+    print "Hello, World!" "\""

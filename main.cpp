@@ -76,16 +76,16 @@ int main( int argc, char * argv[] ) {
     lexertl::rules rules;
     lexertl::state_machine sm;
 
-    rules.push( "^include",           INCLUDE);
-    rules.push( "^(class|category)",  CATEGORY );
-    rules.push( "^xfx",               XFX );
-    rules.push( "^xfy",               XFY );
-    rules.push( "^yfx",               YFX );
-    rules.push( "^xf",                XF );
-    rules.push( "^yf",                YF );
-    rules.push( "^fx",                FX );
-    rules.push( "^fy",                FY );
-    rules.push( "^f",                 F );
+    rules.push( "^include",                  INCLUDE);
+    rules.push( "^(class|category)",         CATEGORY );
+    rules.push( "^xfx",                      XFX );
+    rules.push( "^xfy",                      XFY );
+    rules.push( "^yfx",                      YFX );
+    rules.push( "^xf",                       XF );
+    rules.push( "^yf",                       YF );
+    rules.push( "^fx",                       FX );
+    rules.push( "^fy",                       FY );
+    rules.push( "^f",                        F );
     rules.push( "^("
                     "[^icxyf \t\n\r\f\v]"
                     "|i[^n]"
@@ -117,15 +117,15 @@ int main( int argc, char * argv[] ) {
                     "|f[^ yx\t\n\r\f\v]"
                     "|fx\\S"
                     "|fy\\S"
-                ").*",                COMMENTARY );
-    rules.push( "( |\t)+",            BLANK );
-    rules.push( "\n",                 NEWLINE );
-    rules.push( "\\d+",               NUM );
-    rules.push( "\\{",                LBRACE );
-    rules.push( "\\}",                RBRACE );
-    rules.push( ",",                  COMMA );
-    rules.push( "\\\"[^\"]*\\\"",         STRING );
-    rules.push( "[^ \t\n\r\f\v{},]+", IDENTIFIER );
+                ").*",                       COMMENTARY );
+    rules.push( "( |\t)+",                   BLANK );
+    rules.push( "\n",                        NEWLINE );
+    rules.push( "\\d+",                      NUM );
+    rules.push( "\\{",                       LBRACE );
+    rules.push( "\\}",                       RBRACE );
+    rules.push( ",",                         COMMA );
+    rules.push( "\\\"([^\"]|\\\\\\\")*\\\"", STRING );
+    rules.push( "[^ \t\n\r\f\v{},]+",        IDENTIFIER );
 
     lexertl::generator::build( rules, sm );
 
