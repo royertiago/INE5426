@@ -1,9 +1,35 @@
+xfxxx
+
+include test.h
+
+classe é um comentário;
+class não.
+categoria, por sua vez, é comentário.
+Category também, mas
+category compila.
+
 This is a commentary.
 xfx 400 xfx xfx xfx
+    xfx xfx, xfx, {xfx, xfx, xfx} xfx
 
-xfxx
 f
 A última linha não é um comentário.
-fx
+fx " Este trecho está correto, podemos ter \n numa string.
+"f "
+    """ "Aqui, deve ser mais uma string. Entretanto, a próxima linha é comentário:"
+"Isto é comentário. A propósito, aquele 'f' é um identificador, não uma função. "
 fy
+As próximas linhas, em branco, devem ser ignoradas:
+        
+	
+fx 877 fx fx fx
+    {fx fx fx}, fx {{{fx} fx} fx} fx
 
+xfx 500 > < =
+    =
+Operador >
+    >
+    >
+
+f 100 main
+    print "Hello, World!"

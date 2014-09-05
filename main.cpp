@@ -13,6 +13,7 @@ enum Token {
     NUM = 1,
     INCLUDE,
     CATEGORY,
+    IDENTIFIER,
     STRING,
 
     LBRACE = '{',
@@ -47,6 +48,7 @@ const char * token_to_string( long unsigned int t ) {
         case XFX:        return "XFX";
         case YFX:        return "YFX";
         case XFY:        return "XFY";
+        case IDENTIFIER: return "IDENTIFIER";
         case STRING:     return "STRING";
         case LBRACE:     return "LBRACE";
         case COMMA:      return "COMMA";
@@ -84,16 +86,8 @@ int main( int argc, char * argv[] ) {
     rules.push( "^fx",                FX );
     rules.push( "^fy",                FY );
     rules.push( "^f",                 F );
-    rules.push( "^(    |\t)",         IDENTATION );
-    rules.push( "( |\t)+",            BLANK );
-    rules.push( "\n",                 NEWLINE );
-    rules.push( "\\d+",               NUM );
-    rules.push( "[^ \t\n\r\f\v{},]+", STRING );
-    rules.push( "\\{",                LBRACE );
-    rules.push( "\\}",                RBRACE );
-    rules.push( ",",                  COMMA );
     rules.push( "^("
-                    "[^icxyf]"
+                    "[^icxyf \t\n\r\f\v]"
                     "|i[^n]"
                     "|in[^c]"
                     "|inc[^l]"
@@ -123,7 +117,15 @@ int main( int argc, char * argv[] ) {
                     "|f[^ yx\t\n\r\f\v]"
                     "|fx\\S"
                     "|fy\\S"
-                 ").*",              COMMENTARY );
+                ").*",                COMMENTARY );
+    rules.push( "( |\t)+",            BLANK );
+    rules.push( "\n",                 NEWLINE );
+    rules.push( "\\d+",               NUM );
+    rules.push( "\\{",                LBRACE );
+    rules.push( "\\}",                RBRACE );
+    rules.push( ",",                  COMMA );
+    rules.push( "\\\"[^\"]*\\\"",         STRING );
+    rules.push( "[^ \t\n\r\f\v{},]+", IDENTIFIER );
 
     lexertl::generator::build( rules, sm );
 
