@@ -117,9 +117,9 @@ int main( int argc, char * argv[] ) {
                     "|f[^ yx\t\n\r\f\v]"
                     "|fx\\S"
                     "|fy\\S"
-                ").*",                       COMMENTARY );
-    rules.push( "( |\t)+",                   BLANK );
-    rules.push( "\n",                        NEWLINE );
+                ").*",                       rules.skip() );
+    rules.push( "( |\t)+",                   rules.skip() );
+    rules.push( "\n",                        rules.skip() );
     rules.push( "\\d+",                      NUM );
     rules.push( "\\{",                       LBRACE );
     rules.push( "\\}",                       RBRACE );

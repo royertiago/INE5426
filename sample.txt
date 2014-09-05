@@ -1,0 +1,209 @@
+Este arquivo demonstra as idédias que tive para desenvolver
+a linguagem.
+
+Esta é uma linguagem funcional, baseada em operadores. Todos os comandos
+executáveis são operadores; de fato, não há funções, mas sim, operadores
+unários.
+
+A sintaxe para definição de operadores é inspirada no Prolog. Um operador
+é definido assim:
+
+xfx 600 X > Y
+    Y < X
+
+A primeira linha é a assinatura do operador, e a segunda é o corpo.
+"xfx" é o tipo do operador; neste caso, é uma função binária (cada 'x'
+representa uma variável, e o 'f' o operador). "600" é a prioridade -
+falaremos disto depois.
+
+Em seguida, vem a declaração da variável 'X', o nome do operador, e a
+declaração da variável 'Y'. Na próxima linha, temos o corpo deste operador.
+Neste caso, é o código "Y < X". Este código "chama" o operador "<", já
+implementado. Todos os operadores retornam alguma coisa; isto significa
+que o corpo de todo operador retorna alguma coisa. É esta coisa que é
+considerado o valor de retorno do operador definido.
+
+Portanto, definimos "X > Y" como significando "Y < X".
+(Neste caso, como Y < X retorna 1 se Y for menor que X, e 1 caso contrário,
+efetivamente implementamos o operador "maior que", nos moldes do C/C++.)
+
+Podemos implementar operadores pré-fixados e pós-fixados:
+
+fx 300 -- X
+    X - 1
+
+xf 300 X --
+    -- X
+
+No primeiro operador, definimos "-- X" como significando "X - 1",
+e no segundo, definimos "-- X" como sendo "X --". Ao contrário das
+linguagens imperativas, não há modificação nas variáveis. Os operadorees
+sempre retornam novos valores, sem alterar os antigos.
+
+
+Um conceito introduzido nesta linguagem é a sobrecarga por valor.
+
+fx 300 --- 0
+    0
+fx 300 --- X
+    -- X
+
+Construímos um operador "---" que, caso o operando seja o valor "0",
+o valor de retorno é 0; senão, é o mesmo valor de "-- X".
+Este operador possui duas definições: uma para o valor de entrada 0,
+e outra para valores de entrada diferentes. Não precisamos ter a
+última definição genérica:
+
+fx 300 ! 1
+    0
+fx 300 ! 0
+    1
+
+Esta é a implementação da negação lógica; podemos usá-la para implementar
+o operador ">=" e "<=":
+
+xfx 600 X <= Y
+    !{X > Y}
+xfx 600 X >= Y
+    !{X < Y}
+
+Ao contrário da maioria das linguagens, esta usa chaves para agrupamento.
+Poderíamos implementar a soma como
+
+xfx 600 X + Y
+    X - {0 - Y}
+
+Outra construção básica da linguagem é o par ordenado:
+
+fx 600 +t {X, Y}
+    X + Y
+
+Implementamos um operador "+t", que soma os dois elementos de um par ordenado.
+Chaves, aqui, possuem um significado diferente de no corpo da função;
+na assinatura, as chaves apenas denotam pares ordenados, e no corpo, apenas
+agrupamento. Podemos retornar tuplas assim:
+
+xf 300 X ++--
+    {X + 1, X - 1}
+
+Mas, como chaves servem apenas para agrupamento, este código é equivalente a
+
+xf 300 X --++
+    X + 1, X - 1
+
+Chaves servem apenas para agrupamento no corpo; na assinatura, ela
+ainda é necessária. Ex:
+
+xfx 800 1 select {X, Y}
+    X
+xfx 800 0 select {X, Y}
+    Y
+
+
+Podemos ter pares aninhados:
+
+fx 300 +++ {X, {Y, {Z, W}}}
+    X + Y + Z + W
+
+Para este "aninhamento encadeado", existe uma notação abreviada equivalente:
+
+fx 300 ++++ {X, Y, Z, W}
+    X + Y + Z + W
+
+Desta forma, estamos simulando tuplas com pares ordenados encadeados.
+Note que todos os operadores binários podem ser transformados em operadores
+unários, usando "tuplas".
+
+Note que os valores de entrada de um operador podem ser tanto inteiros quanto
+pares ordenados - de fato, estes são os únicos tipos existentes nesta linguagem.
+Exemplo:
+
+fx 900 sum {X}
+    X
+fx 900 sum {{X}, Y}
+    X + sum Y
+
+Não existe uma "tupla unária"; a notação {X} indica que X têm de ser um valor
+inteiro. Este operador recursivo retorna a soma dos valores de uma lista
+encadeada feita com tuplas; por exemplo, "sum {1, 2, 3, 4}" é 10.
+A notação {X} permite sobrecarga por tipo
+
+Também podemos ter recursão para construir tuplas:
+
+fx 800 index 0
+    0
+fx 800 index X
+    X, index {X - 1}
+
+"index 5" é a tupla {5, {4, {3, {2, {1, 0}}}}}, que, na notação abreviada,
+é {5, 4, 3, 2, 1, 0}.
+Uma função de busca linear numa lista encadeada:
+
+xfx 600 X in {X, Y}
+    1
+xfx 600 X in {Y, X}
+    1
+xfx 600 X in {Y, Z}
+    X in Z
+xfx 600 X in Y
+    0
+
+As duas primeiras cláusulas lidam com o o caso de X estar no começo
+ou no fim de um par ordenado. A terceira cláusula é recursiva, e,
+caso não seja possível decompor Y numa lista, a quarta cláusula retorna
+falso. Este designo é necessário pois "X in X" deve ser falso, mas
+"X in {0, X}" verdadeiro.
+
+
+A palavra-chave "category" pode ser usada para definir constantes
+inteiras únicas. Por exemplo,
+
+category false
+category true
+
+cria duas constantes (false e true) que são numeradas a partir do zero;
+isto é, false é 0 e true é 1. O nome "category" vem do uso desta 
+palavra-chave para simular orientação a objetos:
+
+category IntegerPair
+
+"Objetos" da classe IntegerPair são pares ordenados em que o primeiro
+elemento é o inteiro representado por IntegerPair (2, no caso).
+Podemos implementar métodos (e sobrecarregar operadores) assim:
+
+xf 600 {IntegerPair, X, Y} first
+    X
+xf 600 {IntegerPair, X, Y} second
+    Y
+xfx 600 {IntegerPair, X, Y} - {IntegerPair, Z, W}
+    IntegerPair, X + Z, Y + W
+fx 600 MakePair {{X}, {Y}}
+    IntegerPair, X, Y
+f 600 NewIntegerPair
+    IntegerPair, 0, 0
+
+O penúltimo operador usa a notação {X} para garantir que apenas valores
+inteiros secam utilizados. O último operador é um exemplo de operador
+nulário. Ele apenas possui valor de retorno, sem entrada. Neste caso,
+é o "construtor padrão" da "classe" IntegerPair.
+
+
+Além das palavras-chave "category", "f", "xf", "fx" e "xfx", existem
+"fy", "yf", "yfx" e "xfy", que também definem funções, mas com
+agrupamentos diferentes (muda a forma como as prioridades são lidadas)
+e o comando "include":
+
+include /home/user/sample.txt
+
+Este comando funciona da mesma forma que o #include do C++.
+Todos os códigos desta linguagem estão identados uma vez (no caso
+do corpo do operador) ou iniciam com alguma das seguintes palavras:
+"f", "fx", "fy", "xf", "yf", "xfx", "yfx", "xfy", "category", "include".
+Qualquer outra palavra, no início de uma linha, define comentário;
+portanto, este parágrafo é um comentário e, de fato,
+este arquivo inteiro é um programa válido desta linguagem.
+
+Falta definir:
+-   Como representar strings na linguagem
+-   Comandos tipo printf/scanf
+-   Como lidar com prioridades e agrupamento.
