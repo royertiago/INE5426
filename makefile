@@ -1,7 +1,7 @@
 CXX ?= g++
-CXXFLAGS ?= -std=c++11 -Wall -pedantic -Wextra -ggdb
+CXXFLAGS ?= -std=c++11 -Wall -Wextra -pedantic -Werror -ggdb
 LIBS = lexertl
-ILIBS = $(patsubst %, -I%/, $(LIBS) )
+ILIBS = $(patsubst %, -isystem %/, $(LIBS) )
 
 SOURCES := $(shell find -name "*.cpp" $(patsubst %,! -wholename ./%/\*, $(LIBS) ) )
 OBJ = $(SOURCES:.cpp=.o)
