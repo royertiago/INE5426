@@ -16,11 +16,6 @@ struct Token {
         COMMA  = ',',
         RBRACE = '}',
 
-        IDENTATION = '\t',
-        COMMENTARY = '#',
-        BLANK      = ' ',
-        NEWLINE    = '\n',
-
         F,
         FX,
         FY,
@@ -60,10 +55,6 @@ struct Token {
             case LBRACE:     return "LBRACE";
             case COMMA:      return "COMMA";
             case RBRACE:     return "RBRACE";
-            case IDENTATION: return "IDENTATION";
-            case COMMENTARY: return "COMMENTARY";
-            case BLANK:      return "BLANK";
-            case NEWLINE:    return "NEWLINE";
             default:         return "unknown token";
         }
     }
