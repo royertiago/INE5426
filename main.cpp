@@ -8,6 +8,7 @@
 #include "lexertl/lookup.hpp"
 #include "lexertl/debug.hpp"
 #include "lexertl/generate_cpp.hpp"
+#include "position_iterator.hpp"
 
 enum Token {
     NUM = 1,
@@ -66,13 +67,6 @@ int main( int argc, char * argv[] ) {
         return 1;
     }
 
-    std::ifstream ifi( argv[1] );
-    lexertl::stream_shared_iterator iter(ifi);
-    lexertl::stream_shared_iterator end;
-    lexertl::match_results<lexertl::stream_shared_iterator>
-                results(iter, end);
-
-
     lexertl::rules rules;
     lexertl::state_machine sm;
 
@@ -129,12 +123,30 @@ int main( int argc, char * argv[] ) {
 
     lexertl::generator::build( rules, sm );
 
+    std::ifstream ifi( argv[1], std::ios::in );
+    if( !ifi ) {
+        std::cout << "Error loading file " << argv[1] << '\n';
+        return 1;
+    }
+    std::string str;
+    ifi.seekg( 0, std::ios::end );
+    str.resize( ifi.tellg() );
+    ifi.seekg( 0, std::ios::beg );
+    ifi.read( &str[0], str.size() );
+    ifi.close();
+
+    position_iterator<std::string::iterator> iter( str.begin() );
+    position_iterator<std::string::iterator> end( str.end() );
+    lexertl::match_results<position_iterator<std::string::iterator>>
+                results(iter, end);
+
+
     lexertl::lookup(sm, results);
 
     while (results.id != 0)
     {
         std::cout << "Id: " << token_to_string(results.id) << ", Token: '" <<
-            results.str() << "'\n";
+            results.str() << "' - " << results.start.line() << ':' << results.start.column() << '\n';
         lexertl::lookup(sm, results);
     }
 

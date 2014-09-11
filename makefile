@@ -1,5 +1,5 @@
-CXX ?= g++
-CXXFLAGS ?= -std=c++11 -Wall -Wextra -pedantic -Werror -ggdb
+CXX = /usr/lib/gcc-snapshot/bin/g++
+CXXFLAGS ?= -std=c++1y -Wall -Wextra -pedantic -Werror -ggdb
 LIBS = lexertl
 ILIBS = $(patsubst %, -isystem %/, $(LIBS) )
 
