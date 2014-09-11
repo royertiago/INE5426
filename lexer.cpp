@@ -81,20 +81,22 @@ void Lexer::compute_next() {
     _next.column = _results.start.column();
 }
 
-Lexer::Lexer( const char * filename ) {
+Lexer::Lexer( const char * filename ) :
+    _data( new std::string )
+{
     init();
     std::ifstream in( filename, std::ios::in );
     if( !in ) {
         throw "Read error";
     }
     in.seekg( 0, std::ios::end );
-    _data.resize( in.tellg() );
+    _data->resize( in.tellg() );
     in.seekg( 0, std::ios::beg );
-    in.read( &_data[0], _data.size() );
+    in.read( &(*_data)[0], _data->size() );
     in.close();
 
-    position_iterator<std::string::iterator> iter( _data.begin() );
-    position_iterator<std::string::iterator> end( _data.end() );
+    position_iterator<std::string::iterator> iter( _data->begin() );
+    position_iterator<std::string::iterator> end( _data->end() );
 
     _results = lexertl::match_results<decltype(iter)>( iter, end );
 

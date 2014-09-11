@@ -2,12 +2,13 @@
  * Class that does the lexing phase of the compiler; it is a model of JavaIterator.
  */
 #include <string>
+#include <memory>
 #include <lexertl/match_results.hpp>
 #include "position_iterator.hpp"
 #include "token.h"
 
 class Lexer {
-    std::string _data;
+    std::shared_ptr<std::string> _data;
     lexertl::match_results<position_iterator<std::string::iterator>> _results;
     Token _next;
 public:
