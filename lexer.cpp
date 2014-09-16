@@ -8,6 +8,14 @@
 #include "lexer.h"
 
 namespace {
+    /* The lexertl library scans the input based on state machines,
+     * that can be shared with different input sources.
+     * The following object is the state machine corresponding to
+     * our programming language, and the init() procedure below
+     * initialize the state machine.
+     *
+     * The procedure always check if the state machine has already
+     * been built. */
     lexertl::state_machine sm;
 
     void init() {
@@ -82,21 +90,21 @@ void Lexer::compute_next() {
 }
 
 Lexer::Lexer( const char * filename ) :
-    _data( new std::string )
+    _file( new std::string )
 {
     init();
+
     std::ifstream in( filename, std::ios::in );
-    if( !in ) {
+    if( !in )
         throw "Read error";
-    }
     in.seekg( 0, std::ios::end );
-    _data->resize( in.tellg() );
+    _file->resize( in.tellg() );
     in.seekg( 0, std::ios::beg );
-    in.read( &(*_data)[0], _data->size() );
+    in.read( &(*_file)[0], _file->size() );
     in.close();
 
-    position_iterator<std::string::iterator> iter( _data->begin() );
-    position_iterator<std::string::iterator> end( _data->end() );
+    position_iterator<std::string::iterator> iter( _file->begin() );
+    position_iterator<std::string::iterator> end( _file->end() );
 
     _results = lexertl::match_results<decltype(iter)>( iter, end );
 
