@@ -96,7 +96,7 @@ Lexer::Lexer( const char * filename ) :
 
     std::ifstream in( filename, std::ios::in );
     if( !in )
-        throw "Read error";
+        throw file_error("Error reading file");
     in.seekg( 0, std::ios::end );
     _file->resize( in.tellg() );
     in.seekg( 0, std::ios::beg );
