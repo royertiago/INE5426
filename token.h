@@ -2,6 +2,9 @@
  * Struct that contains all the information pertinent to
  * a token of the language.
  */
+#ifndef TOKEN_H
+#define TOKEN_H
+
 #include <string>
 
 struct Token {
@@ -59,3 +62,5 @@ struct Token {
         }
     }
 };
+
+#endif // TOKEN_H

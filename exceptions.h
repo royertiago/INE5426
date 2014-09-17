@@ -1,6 +1,9 @@
 /* exceptions.h
  * List of all exceptions thrown by the program. 
  */
+#ifndef EXCEPTIONS_H
+#define EXCEPTIONS_H
+
 #include <stdexcept>
 
 struct file_error : public std::runtime_error {
@@ -11,3 +14,4 @@ struct file_error : public std::runtime_error {
         runtime_error( what )
     {}
 };
+#endif // EXCEPTIONS_H

@@ -5,6 +5,9 @@
  * read to a std::string on construction. This string is shared by
  * all the copies of the lexer.
  */
+#ifndef LEXER_H
+#define LEXER_H
+
 #include <string>
 #include <memory>
 #include <lexertl/match_results.hpp>
@@ -50,3 +53,5 @@ private:
     /* Computes the next token in the file and stores in Lexer::_next. */
     void compute_next();
 };
+
+#endif // LEXER_H
