@@ -1,23 +1,41 @@
 CXX := /usr/lib/gcc-snapshot/bin/g++
 CXXFLAGS := -std=c++1y -Wall -Wextra -pedantic -Werror -ggdb
-LIBS := lexertl
+
+# Library definitions
+# ILIBS is the compiler-flags-version of LIBS
+LIBS := lexertl Catch Catch/single_include
 ILIBS := $(patsubst %, -isystem %/, $(LIBS) )
 
+# Variable definitions
+MAIN	:= main.cpp
 SOURCES := $(shell find -name "*.cpp" $(patsubst %,! -wholename ./%/\*, $(LIBS) ) )
-OBJ := $(SOURCES:.cpp=.o)
-OBJDEPS := $(SOURCES:.cpp=.d)
+DEPS	:= $(SOURCES:.cpp=.d)
+TSOURCES:= $(filter		%.test.cpp, $(SOURCES))
+MSOURCES:= $(filter-out %.test.cpp, $(SOURCES))
+MOBJ	:= $(MSOURCES:.cpp=.o)
+TOBJ	:= $(TSOURCES:.cpp=.o)
+OBJ		:= $(filter-out %$(MAIN:.cpp=.o), $(MOBJ))
+# TSOURCES: test sources, MSOURCES: main sources,
+# TOBJ: test objects, MOBJ: main objects.
+# OBJ contains all main objects, but without main.o, that defines "int main()".
 
-a.out: $(OBJ)
+all: a.out test
+
+a.out: $(MOBJ)
 	$(CXX) $^
 
-$(OBJ): %.o : %.cpp makefile
+test: $(OBJ) $(TOBJ)
+	$(CXX) $^ -o test/test
+
+
+$(MOBJ) $(TOBJ): %.o : %.cpp makefile
 	$(CXX) $(CXXFLAGS) $(ILIBS) -c $< -o $@
 	g++ -std=c++0x -MM $< -MF $*.d -MT "$*.o" $(ILIBS)
 	sed -e 's/^.*://' -e 's/\\//' -e 's/ /\n/g' $*.d | sed -e 's/\(..*\)/\1:/' >> $*.d
 
 -include $(OBJDEPS)
 
-.PHONY: clean veryclean
+.PHONY: clean veryclean test
 clean:
 	-find \( -name "*.o" -or -name "*.d" \) -exec rm '{}' \;
 
