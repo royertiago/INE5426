@@ -4,7 +4,7 @@ CXXFLAGS := -std=c++1y -Wall -Wextra -pedantic -Werror -ggdb
 # Library definitions
 # ILIBS is the compiler-flags-version of LIBS
 LIBS := lexertl Catch Catch/single_include
-ILIBS := $(patsubst %, -isystem %/, $(LIBS) )
+ILIBS := $(patsubst %, -isystem %/, $(LIBS) ) -I./
 
 # Variable definitions
 MAIN	:= main.cpp
@@ -19,21 +19,24 @@ OBJ		:= $(filter-out %$(MAIN:.cpp=.o), $(MOBJ))
 # TOBJ: test objects, MOBJ: main objects.
 # OBJ contains all main objects, but without main.o, that defines "int main()".
 
-all: a.out test
+all: a.out test/test
 
 a.out: $(MOBJ)
 	$(CXX) $^
 
-test: $(OBJ) $(TOBJ)
+test: test/test
+	test/test
+
+test/test: $(OBJ) $(TOBJ)
 	$(CXX) $^ -o test/test
 
 
-$(MOBJ) $(TOBJ): %.o : %.cpp makefile
+$(MOBJ) $(TOBJ): %.o : %.cpp
 	$(CXX) $(CXXFLAGS) $(ILIBS) -c $< -o $@
 	g++ -std=c++0x -MM $< -MF $*.d -MT "$*.o" $(ILIBS)
 	sed -e 's/^.*://' -e 's/\\//' -e 's/ /\n/g' $*.d | sed -e 's/\(..*\)/\1:/' >> $*.d
 
--include $(OBJDEPS)
+-include $(DEPS)
 
 .PHONY: clean veryclean test
 clean:

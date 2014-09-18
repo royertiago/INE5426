@@ -155,14 +155,14 @@ union either_base< Head, Tail... > {
 
     /* Operadores "relacionais": teste de ordem (operator<)
      * e igualdade (operator==) feitos pelos métodos
-     * is_smaller_on_index e equals_on_index.
+     * smaller_on_index e equals_on_index.
      *
      * O teste será feito no índice especificado. */
-    bool is_smaller_on_index( unsigned index, const either_base& e ) const {
+    bool smaller_on_index( unsigned index, const either_base& e ) const {
         if( index == 0 )
             return head < e.head;
         else
-            return tail.is_smaller_on_index( index - 1, e.tail );
+            return tail.smaller_on_index( index - 1, e.tail );
     }
     bool equals_on_index( unsigned index, const either_base& e ) const {
         if( index == 0 )
@@ -215,7 +215,7 @@ union either_base<> {
         throw std::runtime_error( "Bad either&& assign." );
     }
 
-    bool is_smaller_on_index( unsigned, const either_base& ) const {
+    bool smaller_on_index( unsigned, const either_base& ) const {
         throw std::runtime_error( "Empty either on operator<" );
     }
     bool equals_on_index( unsigned, const either_base& ) const {

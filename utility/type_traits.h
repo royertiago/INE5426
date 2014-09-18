@@ -30,3 +30,5 @@ struct unqualified {
  *  static_assert( false, "Não insancie com T genérico!" ); */
 template< typename T >
 struct dependant_false : std::false_type {};
+
+#endif // UTILITY_TYPE_TRAITS_H
