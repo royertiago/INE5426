@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include "lexer.h"
+#include "parser.h"
 
 void lexical_analysis( const char * filename ) {
     Lexer alex( filename );
@@ -13,6 +14,15 @@ void lexical_analysis( const char * filename ) {
     }
 }
 
+void syntactic_analysis( const char * filename ) {
+    Parser parser( filename );
+    try {
+        while( parser.has_next() )
+            std::cout << *parser.next() << '\n';
+    } catch ( parse_error& ex ) {
+        std::cerr << ex.what() << ' ' << ex.where.line << ':' << ex.where.column << '\n';
+    }
+}
 
 int main( int argc, char * argv[] ) {
     char * filename;
@@ -37,7 +47,7 @@ int main( int argc, char * argv[] ) {
     if( lexical )
         lexical_analysis( filename );
     else
-        std::cerr << "Syntatical analysis unimplemented\n";
+        syntactic_analysis( filename );
     return 0;
 }
 

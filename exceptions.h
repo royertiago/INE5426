@@ -14,4 +14,16 @@ struct file_error : public std::runtime_error {
         runtime_error( what )
     {}
 };
+
+struct parse_error : public std::runtime_error {
+    Token where;
+    parse_error( const char * what, Token where ) :
+        runtime_error( what ),
+        where( where )
+    {}
+    parse_error( std::string & what, Token where ) :
+        runtime_error( what ),
+        where( where )
+    {}
+};
 #endif // EXCEPTIONS_H
