@@ -6,6 +6,7 @@
 #define TOKEN_H
 
 #include <string>
+#include <ostream>
 
 struct Token {
     enum {
@@ -62,5 +63,8 @@ struct Token {
         }
     }
 };
+
+// ostream printing
+std::ostream& operator<<( std::ostream&, const Token& );
 
 #endif // TOKEN_H

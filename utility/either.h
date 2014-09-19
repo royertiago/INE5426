@@ -10,6 +10,7 @@
  *
  * Não há suporte para referências ou tipos const/volatile.
  */
+// TODO: rewrite entire class to use casts instead of recursion
 #ifndef EITHER_H
 #define EITHER_H
 
@@ -104,7 +105,9 @@ public:
      * Como esta função não possui parâmetro, invoque-a como:
      *  int i = x.get_as<int>(); */
     template< typename T >
-    T get_as() const;
+    T& get_as();
+    template< typename T >
+    const T& get_as() const;
 
     friend bool operator== <>( const either&, const either& );
     friend bool operator< <> ( const either&, const either& );
@@ -200,9 +203,15 @@ either<Ts...>::operator T() const {
 }
 
 template< typename ... Ts > template< typename T >
-T either<Ts...>::get_as() const {
+T& either<Ts...>::get_as() {
     if( is<T>() )
-        return operator T();
+        return *(T*) &value;
+    throw std::runtime_error( "Wrong type either cast\n" );
+}
+template< typename ... Ts > template< typename T >
+const T& either<Ts...>::get_as() const {
+    if( is<T>() )
+        return *(T*) &value;
     throw std::runtime_error( "Wrong type either cast\n" );
 }
 
