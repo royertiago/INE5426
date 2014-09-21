@@ -50,3 +50,16 @@ TEST_CASE( "logical_or metafunction", "[mp]" ) {
         REQUIRE( (logical_or<false, false, false, false, false>::value) == false );
     }
 }
+
+TEST_CASE( "type_index metafunction", "[mp]" ) {
+    using mp::type_index;
+
+    REQUIRE(( type_index<int>::value == -1u ));
+    REQUIRE(( type_index<int, float>::value == -1u ));
+    REQUIRE(( type_index<int, float, float>::value == -1u ));
+    REQUIRE(( type_index<int, double, int>::value == 1 ));
+    REQUIRE(( type_index<int, int, int, int>::value == 0 ));
+    REQUIRE(( type_index<long, int, long>::value == 1 ));
+    REQUIRE(( type_index<unsigned, int, int>::value == -1u ));
+    REQUIRE(( type_index<unsigned, unsigned>::value == 0 ));
+}
