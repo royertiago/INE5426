@@ -12,3 +12,9 @@ Class that have the functions
     bool has_next()
     value next()
     value peek()
+
+Value Metafunction
+Struct that have a static constexpr attribute named "value".
+
+Type Metafunction
+Struct that have a typedef named 'type'.

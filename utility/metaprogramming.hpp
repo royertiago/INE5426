@@ -17,6 +17,8 @@ namespace mp {
      * Return type is unsigned, List is indexed in zero. */
     template< typename T, typename ... List > struct type_index;
 
+    /* Type metafunction that returns the first type in list List. */
+    template< typename ... List > struct head;
 
 
     // Implementation
@@ -50,6 +52,13 @@ namespace mp {
             type_index<T, Tail...>::value == -1u ?
             -1 :
             type_index<T, Tail...>::value + 1;
+    };
+
+
+    template< typename ... List > struct head {};
+    template< typename Head, typename ... Tail >
+    struct head< Head, Tail... > {
+        typedef Head type;
     };
             
 }
