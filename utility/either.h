@@ -92,6 +92,12 @@ private:
 
     /* vtbl_vector is a list of all possible 'type' values. */
     static either_helper::abstract_pseudo_virtual_table * vtbl_vector[ sizeof...(Ts) ];
+
+    /* Returns the vtbl_vector position corresponding to type_index<T, Ts...>,
+     * modulo sizeof...(Ts) + 1. That is, the index if it exists and one-past-last
+     * in the other case. */
+    template< typename T >
+    static either_helper::abstract_pseudo_virtual_table * vtbl();
 };
 
 // Implementação
@@ -100,10 +106,16 @@ template< typename ... Ts >
 either_helper::abstract_pseudo_virtual_table * either<Ts...>::vtbl_vector[ sizeof...(Ts) ]
         = { new either_helper::pseudo_virtual_table<Ts>()... };
 
+template< typename ... Ts > template< typename T >
+either_helper::abstract_pseudo_virtual_table * either<Ts...>::vtbl() {
+    return vtbl_vector[(mp::type_index<T, Ts...>::value + sizeof...(Ts)) % sizeof...(Ts)];
+}
+
+
 // Construtor - a partir de elemento
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>::either( T&& t ) :
-    type( vtbl_vector[mp::type_index<T, Ts...>::value] )
+    type( vtbl<T>() )
 {
     new(&value) T( std::forward<T>( t ) );
 }
@@ -111,9 +123,9 @@ either<Ts...>::either( T&& t ) :
 // Construtor padrão
 template< typename ... Ts >
 either<Ts...>::either() :
-    type( vtbl_vector[0] )
+    type( vtbl<mp::head_t<Ts...>>() )
 {
-    new(&value) typename mp::head<Ts...>::type();
+    new(&value) mp::head_t<Ts...>();
 }
 
 // Construtor de cópia/movimento
@@ -140,12 +152,12 @@ either<Ts...>::~either() {
 // Atribuição de T's
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>& either<Ts...>::operator=( T&& t ) {
-    if( type == vtbl_vector[mp::type_index<T, Ts...>::value] ) {
-        *(T*)&value = t;
+    if( type == vtbl<T>() ) {
+        *(T*)&value = std::forward<T>(t);
     } else {
         type->destroy( &value );
-        new(&value) T( std::forward<T>( t ) );
-        type = vtbl_vector[mp::type_index<T, Ts...>::value];
+        new(&value) T( std::forward<T>(t) );
+        type = vtbl<T>();
     }
     return *this;
 }
@@ -157,8 +169,8 @@ either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
         type->copy_assign( &value, &e.value );
     else {
         type->destroy( &value );
-        type->copy_assign( &value, &e.value );
         type = e.type;
+        type->copy_assign( &value, &e.value );
     }
     return *this;
 }
@@ -169,8 +181,8 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
         type->move_assign( &value, &e.value );
     else {
         type->destroy( &value );
-        type->move_assign( &value, &e.value );
         type = e.type;
+        type->move_assign( &value, &e.value );
     }
     return *this;
 }
@@ -178,7 +190,7 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
 // Funcionalidade básica
 template< typename ... Ts > template< typename T >
 bool either<Ts...>::is() const {
-    return type == vtbl_vector[mp::type_index<T, Ts...>::value];
+    return type == vtbl<T>();
 }
 
 template< typename ... Ts > template< typename T, typename >

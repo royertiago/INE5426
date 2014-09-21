@@ -19,6 +19,7 @@ namespace mp {
 
     /* Type metafunction that returns the first type in list List. */
     template< typename ... List > struct head;
+    template< typename ... List > using head_t = typename head<List...>::type;
 
 
     // Implementation

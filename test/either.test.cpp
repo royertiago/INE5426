@@ -108,17 +108,20 @@ TEST_CASE( "Basic either funcionality", "[either]" ) {
 
             Resource r( 17 );
             either< Resource, int > e = std::move( r );
-            REQUIRE( Resource::copy_count() == 0 );
+            REQUIRE( e.is<Resource>() );
 
             either< Resource, int > f = 7;
             f = std::move( e );
-            REQUIRE( Resource::copy_count() == 0 );
+            REQUIRE( f.is<Resource>() );
+            REQUIRE( Resource::alive_count() == 1 );
 
             either< Resource, int > g = Resource::make();
-            REQUIRE( Resource::copy_count() == 0 );
+            REQUIRE( Resource::alive_count() == 2 );
 
             g = f = 7;
+            REQUIRE( Resource::alive_count() == 0 );
             f = get_either_resource();
+            REQUIRE( Resource::alive_count() == 1 );
         }
         REQUIRE( Resource::copy_count() == 0 );
         REQUIRE( Resource::alive_count() == 0 );
