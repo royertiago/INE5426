@@ -32,7 +32,7 @@ test/test: $(OBJ) $(TOBJ)
 
 
 $(MOBJ) $(TOBJ): %.o : %.cpp
-	$(CXX) $(CXXFLAGS) $(ILIBS) $(FINCLUDE) -DIX -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(ILIBS) $(FINCLUDE) -c $< -o $@
 	g++ -std=c++0x -MM $< -MF $*.d -MT "$*.o" $(ILIBS)
 	sed -e 's/^.*://' -e 's/\\//' -e 's/ /\n/g' $*.d | sed -e 's/\(..*\)/\1:/' >> $*.d
 

@@ -1,7 +1,7 @@
 /* either.test.cpp
  * Unit test to 'either' template class.
  */
-#include "utility/either.h"
+#include "utility/either.hpp"
 
 #include <algorithm> // sort
 #include <map>

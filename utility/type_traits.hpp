@@ -9,7 +9,7 @@
 #include <type_traits>
 
 /* Remove referências e const/volatile do tipo passado.
- * Assim, 
+ * Assim,
  *  const int&
  *  int&
  *  volatile int&&
@@ -26,7 +26,7 @@ struct unqualified {
  * de maneira idêntica a std::false_type, entretanto,
  * ela depende de um parâmetro do template.
  *
- * Isso permite formalizar 
+ * Isso permite formalizar
  *  static_assert( false, "Não insancie com T genérico!" ); */
 template< typename T >
 struct dependant_false : std::false_type {};

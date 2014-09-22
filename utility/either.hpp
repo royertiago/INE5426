@@ -5,7 +5,7 @@
  * desenvolvida para o uso em contêiners heterogêneos.
  *
  * Esta classe suporta objetos de quantos tipos forem necessários,
- * especifiados via templates. Objetos desta classe sempre conterão 
+ * especifiados via templates. Objetos desta classe sempre conterão
  * um elemento válido, de algum dos tipos especificados.
  *
  * Não há suporte para referências ou tipos const/volatile.
@@ -13,8 +13,10 @@
 #ifndef EITHER_H
 #define EITHER_H
 
-#include "either_helper.h"
-#include "utility/type_traits.h"
+#include <stdexcept>
+#include "either_helper.hpp"
+#include "utility/type_traits.hpp"
+#include "utility/metaprogramming.hpp"
 
 template< typename ... Ts >
 class either {
