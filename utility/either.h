@@ -86,36 +86,26 @@ private:
     // value holds the actual value of the object.
     std::aligned_storage_t<sizeof(either_helper::common_alignment<Ts...>)> value;
 
-    /* type is a pointer to a structure that will do the type-specific
-     * tasks, such as assignment and destruction. */
-    either_helper::abstract_pseudo_virtual_table * type;
+    /* type is the index mp::type_index<T, Ts...>::value. */
+    unsigned type;
 
-    /* vtbl_vector is a list of all possible 'type' values. */
-    static either_helper::abstract_pseudo_virtual_table * vtbl_vector[ sizeof...(Ts) ];
-
-    /* Returns the vtbl_vector position corresponding to type_index<T, Ts...>,
-     * modulo sizeof...(Ts) + 1. That is, the index if it exists and one-past-last
-     * in the other case. */
-    template< typename T >
-    static either_helper::abstract_pseudo_virtual_table * vtbl();
+    typedef void (*destructor)( void * );
+    static destructor destroy[sizeof...(Ts)];
 };
 
 // Implementação
 
 template< typename ... Ts >
-either_helper::abstract_pseudo_virtual_table * either<Ts...>::vtbl_vector[ sizeof...(Ts) ]
-        = { new either_helper::pseudo_virtual_table<Ts>()... };
-
-template< typename ... Ts > template< typename T >
-either_helper::abstract_pseudo_virtual_table * either<Ts...>::vtbl() {
-    return vtbl_vector[(mp::type_index<T, Ts...>::value + sizeof...(Ts)) % sizeof...(Ts)];
-}
-
+either<Ts...>::destructor either<Ts...>::destroy[sizeof...(Ts)] = {
+    []( void * target ){
+        ((Ts*)target)->~Ts();
+    }...
+};
 
 // Construtor - a partir de elemento
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>::either( T&& t ) :
-    type( vtbl<T>() )
+    type( mp::type_index<T, Ts...>::value )
 {
     new(&value) T( std::forward<T>( t ) );
 }
@@ -123,7 +113,7 @@ either<Ts...>::either( T&& t ) :
 // Construtor padrão
 template< typename ... Ts >
 either<Ts...>::either() :
-    type( vtbl<mp::head_t<Ts...>>() )
+    type( 0 )
 {
     new(&value) mp::head_t<Ts...>();
 }
@@ -133,31 +123,43 @@ template< typename ... Ts >
 either<Ts...>::either( const either<Ts...>& e ) :
     type( e.type )
 {
-    type->copy_construct( &value, &e.value );
+    typedef void (*f)( void *, const void * );
+    static f copy_construct[sizeof...(Ts)] = {
+        []( void * target, const void * source ){
+            new (target) Ts( *(const Ts*)source );
+        }...
+    };
+    copy_construct[type]( &value, &e.value );
 }
 
 template< typename ... Ts >
 either<Ts...>::either( either<Ts...>&& e ) :
     type( e.type )
 {
-    type->move_construct( &value, &e.value );
+    typedef void (*f)( void *, void * );
+    static f move_construct[sizeof...(Ts)] = {
+        []( void * target, void * source ){
+            new (target) Ts( std::move(*(Ts*)source) );
+        }...
+    };
+    move_construct[type]( &value, &e.value );
 }
 
 // Destrutor
 template< typename ... Ts >
 either<Ts...>::~either() {
-    type->destroy( &value );
+    destroy[type]( &value );
 }
 
 // Atribuição de T's
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>& either<Ts...>::operator=( T&& t ) {
-    if( type == vtbl<T>() ) {
+    if( type == mp::type_index<T, Ts...>::value ) {
         *(T*)&value = std::forward<T>(t);
     } else {
-        type->destroy( &value );
+        destroy[type]( &value );
         new(&value) T( std::forward<T>(t) );
-        type = vtbl<T>();
+        type = mp::type_index<T, Ts...>::value;
     }
     return *this;
 }
@@ -165,24 +167,48 @@ either<Ts...>& either<Ts...>::operator=( T&& t ) {
 // Atribuição de either's
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
+    typedef void (*f)( void *, const void * );
+    static f copy_assign[sizeof...(Ts)] = {
+        []( void * target, const void * source ){
+            *(T*)target = *(const T*)source,
+        }...
+    };
+    typedef void (*f)( void *, const void * );
+    static f copy_construct[sizeof...(Ts)] = {
+        []( void * target, const void * source ){
+            new (target) Ts( *(const Ts*)source );
+        }...
+    }; // TODO: this code is copied from constructor
+
     if( type == e.type )
-        type->copy_assign( &value, &e.value );
+        copy_assign[type]( &value, &e.value );
     else {
-        type->destroy( &value );
+        destroy[type]( &value );
         type = e.type;
-        type->copy_assign( &value, &e.value );
+        copy_construct[type]( &value, &e.value );
     }
     return *this;
 }
 
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
+    typedef void (*f)( void *, void * );
+    static f move_assign[sizeof...(Ts)] = {
+        []( void * target, void * source ){
+            *(T*)target = std::move(*(T*)source),
+        }...
+    };
+    static f move_construct[sizeof...(Ts)] = {
+        []( void * target, void * source ){
+            new (target) Ts( std::move(*(Ts*)source) );
+        }...
+    }; // TODO: this code is copied from constructor
     if( type == e.type )
-        type->move_assign( &value, &e.value );
+        move_assign[type]( &value, &e.value );
     else {
-        type->destroy( &value );
+        destroy[type]( &value );
         type = e.type;
-        type->move_assign( &value, &e.value );
+        move_construct[type]( &value, &e.value );
     }
     return *this;
 }
@@ -190,7 +216,7 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
 // Funcionalidade básica
 template< typename ... Ts > template< typename T >
 bool either<Ts...>::is() const {
-    return type == vtbl<T>();
+    return type == mp::type_index<Ts...>::value;
 }
 
 template< typename ... Ts > template< typename T, typename >
