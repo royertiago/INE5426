@@ -10,6 +10,7 @@
  *
  * Não há suporte para referências ou tipos const/volatile.
  */
+// TODO: rewrite entire class to use casts instead of recursion
 #ifndef EITHER_H
 #define EITHER_H
 
