@@ -96,10 +96,8 @@ private:
 // Implementação
 
 template< typename ... Ts >
-either<Ts...>::destructor either<Ts...>::destroy[sizeof...(Ts)] = {
-    []( void * target ){
-        ((Ts*)target)->~Ts();
-    }...
+typename either<Ts...>::destructor either<Ts...>::destroy[sizeof...(Ts)] = {
+    either_helper::destroy<Ts>...
 };
 
 // Construtor - a partir de elemento
@@ -125,9 +123,7 @@ either<Ts...>::either( const either<Ts...>& e ) :
 {
     typedef void (*f)( void *, const void * );
     static f copy_construct[sizeof...(Ts)] = {
-        []( void * target, const void * source ){
-            new (target) Ts( *(const Ts*)source );
-        }...
+        either_helper::copy_construct<Ts>...
     };
     copy_construct[type]( &value, &e.value );
 }
@@ -138,9 +134,7 @@ either<Ts...>::either( either<Ts...>&& e ) :
 {
     typedef void (*f)( void *, void * );
     static f move_construct[sizeof...(Ts)] = {
-        []( void * target, void * source ){
-            new (target) Ts( std::move(*(Ts*)source) );
-        }...
+        either_helper::move_construct<Ts>...
     };
     move_construct[type]( &value, &e.value );
 }
@@ -169,15 +163,10 @@ template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
     typedef void (*f)( void *, const void * );
     static f copy_assign[sizeof...(Ts)] = {
-        []( void * target, const void * source ){
-            *(T*)target = *(const T*)source,
-        }...
+        either_helper::copy_assign<Ts>...
     };
-    typedef void (*f)( void *, const void * );
     static f copy_construct[sizeof...(Ts)] = {
-        []( void * target, const void * source ){
-            new (target) Ts( *(const Ts*)source );
-        }...
+        either_helper::copy_assign<Ts>...
     }; // TODO: this code is copied from constructor
 
     if( type == e.type )
@@ -194,14 +183,10 @@ template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
     typedef void (*f)( void *, void * );
     static f move_assign[sizeof...(Ts)] = {
-        []( void * target, void * source ){
-            *(T*)target = std::move(*(T*)source),
-        }...
+        either_helper::move_assign<Ts>...
     };
     static f move_construct[sizeof...(Ts)] = {
-        []( void * target, void * source ){
-            new (target) Ts( std::move(*(Ts*)source) );
-        }...
+        either_helper::move_construct<Ts>...
     }; // TODO: this code is copied from constructor
     if( type == e.type )
         move_assign[type]( &value, &e.value );
