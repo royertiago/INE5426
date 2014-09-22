@@ -126,4 +126,35 @@ TEST_CASE( "Basic either funcionality", "[either]" ) {
         REQUIRE( Resource::copy_count() == 0 );
         REQUIRE( Resource::alive_count() == 0 );
     }
+
+    SECTION( "either<unique_ptr>, no syntatic sugar" ) {
+        { // subscope
+            Resource::reset();
+
+            either< std::unique_ptr<Resource>, char > e( std::make_unique<Resource>(196) );
+
+            REQUIRE( e.is<std::unique_ptr<Resource>>() );
+            REQUIRE_FALSE( e.is<char>() );
+
+            either< std::unique_ptr<Resource>, char > f(
+                    std::unique_ptr<Resource>(new Resource(42)) );
+            REQUIRE( Resource::alive_count() == 2 );
+            f = std::move( e );
+            e = '7';
+            REQUIRE( e.is<char>() );
+            REQUIRE( f.is<std::unique_ptr<Resource>>() );
+            REQUIRE( Resource::alive_count() == 1 );
+
+            f = std::move( e );
+            REQUIRE( f.is<char>() );
+            REQUIRE( Resource::alive_count() == 0 );
+
+            e = std::unique_ptr<Resource>(new Resource(137));
+            // TODO: e = new Resource(137);
+            REQUIRE( e.is<std::unique_ptr<Resource>>() );
+            REQUIRE( Resource::alive_count() == 1 );
+        }
+        REQUIRE( Resource::copy_count() == 0 );
+        REQUIRE( Resource::alive_count() == 0 );
+    }
 }
