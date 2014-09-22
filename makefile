@@ -1,5 +1,5 @@
 CXX := /usr/lib/gcc-snapshot/bin/g++
-CXXFLAGS := -std=c++1y -Wall -Wextra -pedantic -Werror -ggdb
+CXXFLAGS := -std=c++1y -Wall -Wextra -pedantic -Werror -g
 
 # Library definitions
 # ILIBS is the compiler-flags-version of LIBS
@@ -32,7 +32,7 @@ test/test: $(OBJ) $(TOBJ)
 
 
 $(MOBJ) $(TOBJ): %.o : %.cpp
-	$(CXX) $(CXXFLAGS) $(ILIBS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(ILIBS) $(FINCLUDE) -DIX -c $< -o $@
 	g++ -std=c++0x -MM $< -MF $*.d -MT "$*.o" $(ILIBS)
 	sed -e 's/^.*://' -e 's/\\//' -e 's/ /\n/g' $*.d | sed -e 's/\(..*\)/\1:/' >> $*.d
 

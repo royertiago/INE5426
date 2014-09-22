@@ -14,49 +14,16 @@
 #ifndef EITHER_H
 #define EITHER_H
 
-#include "either_base.h"
+#include "either_helper.h"
 #include "utility/type_traits.h"
 
-// Declaração dos operadores relacionais como amigos
-template< typename ... Ts >
-class either;
-
-/* Igualdade entre valores.
- * Os valores serão considerados iguais apenas se forem do mesmo
- * tipo e os valores internos forem iguais.
- * Exige-se que operator== esteja sobrecarregado para todos
- * os tipos armazenáveis pela classe.
- *
- * Este operador também está sobrecarregado para comparar diretamente
- * um either com um dos tipos, exigindo, neste caso, apenas a sobrecarga
- * de operator== para o tipo comparado.
- *
- * operator!= também está definido para estes casos, apenas não declarado
- * aqui por não haver necessidade de declará-lo como amigo.
- */
-template< typename ... Ts >
-bool operator==( const either<Ts...>&, const either<Ts...>& );
-
-/* Ordenamento.
- * Se os tipos internos diferirem, o tipo que vem antes na lista
- * de parâmetros para o template é considerado menor.
- * Caso contrário, a comparação é delegada para operator<, que
- * exige-se estar sobrecarregado para todos os tipos da classe. */
-template< typename ... Ts >
-bool operator<( const either<Ts...>&, const either<Ts...>& );
-
-
-// Definição
 template< typename ... Ts >
 class either {
-    either_base< Ts... > value;
-    unsigned int type;
-
 public:
     /* Constrói a classe com o tipo especificado. */
     template< typename T,
         typename = typename std::enable_if<
-            either_base<Ts...>::template type_index<T>() != -1
+            mp::type_index<T, Ts...>::value != -1u
         >::type
     >
     either( T&& t );
@@ -75,7 +42,7 @@ public:
      * Caso o tipo interno do objeto mude, o objeto atual é destruído. */
     template< typename T,
         typename = typename std::enable_if<
-            either_base<Ts...>::template type_index<T>() != -1
+            mp::type_index<T, Ts...>::value != -1u
         >::type
     >
     either& operator=( T&& );
@@ -89,11 +56,11 @@ public:
     bool is() const;
 
     /* Retorna o objeto armazenando internamente.
-     * Não há erros caso o tipo interno seja diferente do operador
+     * São ignorados erros caso o tipo interno seja diferente do operador
      * de conversão especificado. */
     template< typename T,
         typename = typename std::enable_if<
-            either_base<Ts...>::template type_index<T>() != -1
+            mp::type_index<T, Ts...>::value != -1u
         >::type
     >
     operator T() const;
@@ -103,65 +70,91 @@ public:
      * std::bad_cast é lançado.
      *
      * Como esta função não possui parâmetro, invoque-a como:
-     *  int i = x.get_as<int>(); */
+     *  int i = x.get<int>(); */
     template< typename T >
-    T& get_as();
+    const T& get() const;
     template< typename T >
-    const T& get_as() const;
+    T& get();
 
-    friend bool operator== <>( const either&, const either& );
-    friend bool operator< <> ( const either&, const either& );
+    static_assert( !mp::logical_or< std::is_reference<Ts>::value...  >::value,
+            "There is no support to references." );
+    static_assert( !mp::logical_or< std::is_const<Ts>::value... >::value,
+            "There is no support to const types." );
+    static_assert( !mp::logical_or< std::is_volatile<Ts>::value... >::value,
+            "There is no support to volatile types." );
+
+private:
+    // value holds the actual value of the object.
+    std::aligned_storage_t<sizeof(either_helper::common_alignment<Ts...>)> value;
+
+    /* type is the index mp::type_index<T, Ts...>::value. */
+    unsigned type;
+
+    typedef void (*destructor)( void * );
+    static destructor destroy[sizeof...(Ts)];
 };
 
-
 // Implementação
+
+template< typename ... Ts >
+typename either<Ts...>::destructor either<Ts...>::destroy[sizeof...(Ts)] = {
+    either_helper::destroy<Ts>...
+};
 
 // Construtor - a partir de elemento
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>::either( T&& t ) :
-    value( std::forward<T>(t) ),
-    type( either_base<Ts...>::template type_index<T>() )
-{}
+    type( mp::type_index<T, Ts...>::value )
+{
+    new(&value) T( std::forward<T>( t ) );
+}
 
 // Construtor padrão
 template< typename ... Ts >
 either<Ts...>::either() :
-    value(),
     type( 0 )
-{}
+{
+    new(&value) mp::head_t<Ts...>();
+}
 
 // Construtor de cópia/movimento
 template< typename ... Ts >
 either<Ts...>::either( const either<Ts...>& e ) :
-    value( e.value, e.type ),
     type( e.type )
-{}
+{
+    typedef void (*f)( void *, const void * );
+    static f copy_construct[sizeof...(Ts)] = {
+        either_helper::copy_construct<Ts>...
+    };
+    copy_construct[type]( &value, &e.value );
+}
 
 template< typename ... Ts >
 either<Ts...>::either( either<Ts...>&& e ) :
-value( std::move(e.value), e.type ),
     type( e.type )
-{}
+{
+    typedef void (*f)( void *, void * );
+    static f move_construct[sizeof...(Ts)] = {
+        either_helper::move_construct<Ts>...
+    };
+    move_construct[type]( &value, &e.value );
+}
 
 // Destrutor
 template< typename ... Ts >
 either<Ts...>::~either() {
-    value.destroy( type );
+    destroy[type]( &value );
 }
 
 // Atribuição de T's
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>& either<Ts...>::operator=( T&& t ) {
-    if( either_base<Ts...>::template type_index<T>() == type ) {
-        value.get( identity<typename unqualified<T>::type>() )
-            = std::forward<T>(t);
-        /* Desqualificamos o tipo pois T&& é uma "referência universal",
-         * então T pode resolver para const T&, por exemplo. */
-    }
-    else {
-        value.destroy( type );
-        new (&value) either_base<Ts...>( std::forward<T>(t) );
-        type = either_base<Ts...>::template type_index<T>();
+    if( type == mp::type_index<T, Ts...>::value ) {
+        *(T*)&value = std::forward<T>(t);
+    } else {
+        destroy[type]( &value );
+        new(&value) T( std::forward<T>(t) );
+        type = mp::type_index<T, Ts...>::value;
     }
     return *this;
 }
@@ -169,24 +162,40 @@ either<Ts...>& either<Ts...>::operator=( T&& t ) {
 // Atribuição de either's
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
+    typedef void (*f)( void *, const void * );
+    static f copy_assign[sizeof...(Ts)] = {
+        either_helper::copy_assign<Ts>...
+    };
+    static f copy_construct[sizeof...(Ts)] = {
+        either_helper::copy_assign<Ts>...
+    }; // TODO: this code is copied from constructor
+
     if( type == e.type )
-        value.assign_on_index( type, e.value );
+        copy_assign[type]( &value, &e.value );
     else {
-        value.destroy( type );
-        new (&value) either_base<Ts...>( e.value, e.type );
+        destroy[type]( &value );
         type = e.type;
+        copy_construct[type]( &value, &e.value );
     }
     return *this;
 }
 
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
+    typedef void (*f)( void *, void * );
+    static f move_assign[sizeof...(Ts)] = {
+        either_helper::move_assign<Ts>...
+    };
+    static f move_construct[sizeof...(Ts)] = {
+        either_helper::move_construct<Ts>...
+    }; // TODO: this code is copied from constructor
+
     if( type == e.type )
-        value.assign_on_index( type, e.value );
+        move_assign[type]( &value, &e.value );
     else {
-        value.destroy( type );
-        new (&value) either_base<Ts...>( std::move(e.value), e.type );
+        destroy[type]( &value );
         type = e.type;
+        move_construct[type]( &value, &e.value );
     }
     return *this;
 }
@@ -194,81 +203,24 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
 // Funcionalidade básica
 template< typename ... Ts > template< typename T >
 bool either<Ts...>::is() const {
-    return either_base<Ts...>::template type_index<T>() == type;
+    return type == mp::type_index<T, Ts...>::value;
 }
 
 template< typename ... Ts > template< typename T, typename >
 either<Ts...>::operator T() const {
-    return value.get( identity<T>() );
+    return *(T*) &value;
 }
 
 template< typename ... Ts > template< typename T >
-T& either<Ts...>::get_as() {
+T& either<Ts...>::get() {
     if( is<T>() )
         return *(T*) &value;
     throw std::runtime_error( "Wrong type either cast\n" );
 }
 template< typename ... Ts > template< typename T >
-const T& either<Ts...>::get_as() const {
+const T& either<Ts...>::get() const {
     if( is<T>() )
-        return *(T*) &value;
+        return *(const T*) &value;
     throw std::runtime_error( "Wrong type either cast\n" );
-}
-
-// operator==
-template< typename ... Ts >
-bool operator==( const either<Ts...>& lhs, const either<Ts...>& rhs ) {
-    return lhs.type == rhs.type && 
-        lhs.value.equals_on_index( rhs.type, rhs.value );
-}
-
-template< typename T, typename ... Ts >
-typename std::enable_if<
-        either_base<Ts...>::template type_index<T>() != -1, bool
-    >::type
-operator==( const either<Ts...>& lhs, const T& rhs ) {
-    if( lhs.template is<T>() )
-        return lhs.operator T() == rhs;
-    return false;
-}
-
-template< typename T, typename ... Ts >
-typename std::enable_if<
-        either_base<Ts...>::template type_index<T>() != -1, bool
-    >::type
-operator==( const T& lhs, const either<Ts...>& rhs ) {
-    return rhs == lhs;
-}
-
-// operator!=
-template< typename ... Ts >
-bool operator!=( const either<Ts...>& lhs, const either<Ts...>& rhs ) {
-    return !(lhs == rhs); 
-}
-
-template< typename T, typename ... Ts >
-typename std::enable_if<
-        either_base<Ts...>::template type_index<T>() != -1, bool
-    >::type
-operator!=( const either<Ts...>& lhs, const T& rhs ) {
-    return !(lhs == rhs); 
-}
-
-template< typename T, typename ... Ts >
-typename std::enable_if<
-        either_base<Ts...>::template type_index<T>() != -1, bool
-    >::type
-operator!=( const T& lhs, const either<Ts...>& rhs ) {
-    return !(lhs == rhs); 
-}
-
-// operator<
-template< typename ... Ts >
-bool operator<( const either<Ts...>& lhs, const either<Ts...>& rhs ) {
-    if( lhs.type < rhs.type )
-        return true;
-    if( rhs.type < lhs.type )
-        return false;
-    return lhs.value.smaller_on_index( lhs.type, rhs.value );
 }
 #endif // EITHER_H

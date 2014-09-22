@@ -46,9 +46,9 @@ std::ostream& OperatorDefinition::print_to( std::ostream& os ) const {
     for( auto& either : names ) {
         os << separator;
         if( either.is<Token>() )
-            os << either.get_as<Token>();
+            os << either.get<Token>();
         else
-            os << *either.get_as< std::unique_ptr<OperatorVariable> >();
+            os << *either.get< std::unique_ptr<OperatorVariable> >();
         separator = " ";
     }
     os << '\n';
