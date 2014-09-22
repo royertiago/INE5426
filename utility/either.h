@@ -188,6 +188,7 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
     static f move_construct[sizeof...(Ts)] = {
         either_helper::move_construct<Ts>...
     }; // TODO: this code is copied from constructor
+
     if( type == e.type )
         move_assign[type]( &value, &e.value );
     else {
@@ -201,7 +202,7 @@ either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
 // Funcionalidade básica
 template< typename ... Ts > template< typename T >
 bool either<Ts...>::is() const {
-    return type == mp::type_index<Ts...>::value;
+    return type == mp::type_index<T, Ts...>::value;
 }
 
 template< typename ... Ts > template< typename T, typename >
