@@ -58,7 +58,7 @@ struct PairBody : public OperatorBody {
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
-struct SequencedBody : public OperatorBody {
+struct SequenceBody : public OperatorBody {
     std::vector<std::unique_ptr<OperatorBody>> sequence;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };

@@ -19,7 +19,7 @@ std::ostream& PairBody::print_to( std::ostream& os ) const {
     return os << '{' << *first << ", " << *second << '}';
 }
 
-std::ostream& SequencedBody::print_to( std::ostream& os ) const {
+std::ostream& SequenceBody::print_to( std::ostream& os ) const {
     const char * separator = "";
     for( auto& ptr : sequence ) {
         os << separator << *ptr;

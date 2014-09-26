@@ -1,6 +1,7 @@
 /* parser.cpp
  * Implementation of parser.h
  */
+#include <cstdlib>
 #include "parser.h"
 #include "exceptions.h"
 
@@ -15,9 +16,13 @@ namespace {
 
     /* Parse an operator definition.
      * The first token will be assumed have Token::F, Token::FX etc. as id. */
-    std::unique_ptr<OperatorDefinition> parse_operator( Lexer& ) {
-        return nullptr;
-    }
+    std::unique_ptr<OperatorDefinition> parse_operator( Lexer& );
+
+    /* Parse a variable definition, in operator headers. */
+    std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
+
+    /* Parse an operator body. */
+    std::unique_ptr<OperatorBody> parse_body( Lexer& );
 }
 
 void Parser::compute_next() {
@@ -67,4 +72,51 @@ std::unique_ptr<CategoryDefinition> parse_category( Lexer& alex ) {
     ptr->name = alex.next();
     return std::move( ptr );
 }
+
+std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
+    auto ptr = std::make_unique<OperatorDefinition>();
+    ptr->format = alex.next().lexeme;
+
+    if( alex.peek().id != Token::NUM ) throw parse_error( "Expected priority", alex.next() );
+    ptr->priority = std::atoi(alex.next().lexeme.c_str());
+
+//  for( char c : ptr->format )
+//      if( c == 'f' )
+//          ptr->names.push_back( either<std::unique_ptr<OperatorBody>, Token>(std::move(alex.next())) );
+//      else
+//          ptr->names.push_back( parse_variable( alex ) );
+
+    ptr->body = parse_body( alex );
+    return std::move( ptr );
+}
+
+std::unique_ptr<SequenceBody> parse_sequence( Lexer& ) {
+    return nullptr; // FIXME
+}
+
+
+std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
+    auto ptr = parse_sequence( alex );
+    if( alex.has_next() )
+        switch( alex.peek().id ) {
+            case Token::INCLUDE:
+            case Token::CATEGORY:
+            case Token::F:
+            case Token::FX:
+            case Token::FY:
+            case Token::XF:
+            case Token::YF:
+            case Token::XFX:
+            case Token::YFX:
+            case Token::XFY:
+                break;
+            default: throw parse_error( "Unfinished body", alex.next() );
+        }
+    return std::move( ptr );
+}
+
+std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
+    return nullptr;
+}
+
 } // anonymous namespace
