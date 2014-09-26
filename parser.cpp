@@ -1,6 +1,7 @@
 /* parser.cpp
  * Implementation of parser.h
  */
+#include <cstdlib>
 #include "parser.h"
 #include "exceptions.h"
 
@@ -15,9 +16,13 @@ namespace {
 
     /* Parse an operator definition.
      * The first token will be assumed have Token::F, Token::FX etc. as id. */
-    std::unique_ptr<OperatorDefinition> parse_operator( Lexer& ) {
-        return nullptr;
-    }
+    std::unique_ptr<OperatorDefinition> parse_operator( Lexer& );
+
+    /* Parse a variable definition, in operator headers. */
+    std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
+
+    /* Parse an operator body. */
+    std::unique_ptr<OperatorBody> parse_body( Lexer& );
 }
 
 void Parser::compute_next() {
@@ -48,10 +53,11 @@ void Parser::compute_next() {
 }
 
 namespace {
+
 std::unique_ptr<IncludeCommand> parse_include( Lexer& alex ) {
     alex.next();
     if( alex.peek().id != Token::IDENTIFIER )
-        throw parse_error( "Expected identifier (parse_include)", alex.next() );
+        throw parse_error( "Expected identifier after 'include' token", alex.next() );
 
     auto ptr = std::make_unique<IncludeCommand>();
     ptr->filename = alex.next();
@@ -61,10 +67,63 @@ std::unique_ptr<IncludeCommand> parse_include( Lexer& alex ) {
 std::unique_ptr<CategoryDefinition> parse_category( Lexer& alex ) {
     alex.next();
     if( alex.peek().id != Token::IDENTIFIER )
-        throw parse_error( "Expected identifier (parse_category)", alex.next() );
+        throw parse_error( "Expected identifier after 'category' token", alex.next() );
 
     auto ptr = std::make_unique<CategoryDefinition>();
     ptr->name = alex.next();
     return std::move( ptr );
 }
+
+std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
+    auto ptr = std::make_unique<OperatorDefinition>();
+    ptr->format = alex.next().lexeme;
+
+    if( alex.peek().id != Token::NUM ) throw parse_error( "Expected priority", alex.next() );
+    ptr->priority = std::atoi(alex.next().lexeme.c_str());
+
+    for( char c : ptr->format )
+        if( c == 'f' )
+            ptr->names.push_back( alex.next() );
+        else
+            ptr->names.push_back( parse_variable( alex ) );
+
+    ptr->body = parse_body( alex );
+    if( alex.peek().id == '}' )
+        throw parse_error( "Right brace never opened", alex.next() );
+    if( alex.has_next() && Token::declarator(alex.peek() ) )
+        throw parse_error( "Unfinished operator body", alex.next() );
+    return std::move( ptr );
+}
+
+std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
+    return nullptr; // FIXME: implement
+}
+
+std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
+    auto ptr = std::make_unique<SequenceBody>();
+    Token tok;
+    while( true ) {
+        tok = alex.next();
+        if( Token::sequence(tok) )
+            // TODO: inplicit either conversion
+            ptr->sequence.push_back( either<std::unique_ptr<OperatorBody>,Token>(tok) );
+        else if( tok.id == '{' ) {
+            ptr->sequence.push_back( parse_body(alex) );
+            if( alex.next().id != '}' )
+                throw parse_error( "Left brace never closed", tok );
+        } else
+            break;
+    }
+    if( ptr->sequence.empty() )
+        throw parse_error( "Invalid empty token sequence", tok );
+    if( tok.id == ',' ) {
+        // TODO: implicit conversion
+        auto rptr = std::make_unique<PairBody>();
+        rptr->first = std::move( ptr ),
+        rptr->second = parse_body( alex );
+        return rptr;
+    }
+    return ptr;
+}
+
 } // anonymous namespace

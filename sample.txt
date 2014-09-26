@@ -1,5 +1,4 @@
-Este arquivo demonstra as idédias que tive para desenvolver
-a linguagem.
+Este arquivo demonstra as idéias básicas da linguagem.
 
 Esta é uma linguagem funcional, baseada em operadores. Todos os comandos
 executáveis são operadores; de fato, não há funções, mas sim, operadores
@@ -91,7 +90,8 @@ Mas, como chaves servem apenas para agrupamento, este código é equivalente a
 xf 300 X --++
     X + 1, X - 1
 
-Chaves servem apenas para agrupamento no corpo; na assinatura, ela
+(O "operador" vírgula possui a menor precedência entre os operadores.)
+Chaves, no corpo, servem apenas para agrupamento; na assinatura, ela
 ainda é necessária. Ex:
 
 xfx 800 1 select {X, Y}
@@ -126,7 +126,7 @@ fx 900 sum {{X}, Y}
 Não existe uma "tupla unária"; a notação {X} indica que X têm de ser um valor
 inteiro. Este operador recursivo retorna a soma dos valores de uma lista
 encadeada feita com tuplas; por exemplo, "sum {1, 2, 3, 4}" é 10.
-A notação {X} permite sobrecarga por tipo
+A notação {X} permite sobrecarga por tipo.
 
 Também podemos ter recursão para construir tuplas:
 

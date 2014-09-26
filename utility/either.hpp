@@ -25,7 +25,7 @@ public:
     /* Constrói a classe com o tipo especificado. */
     template< typename T,
         typename = typename std::enable_if<
-            mp::type_index<T, Ts...>::value != -1u
+            mp::type_index< typename unqualified<T>::type, Ts...>::value != -1u
         >::type
     >
     either( T&& t );

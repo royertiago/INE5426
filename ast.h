@@ -11,7 +11,7 @@
 #include "utility/either.hpp"
 #include "token.h"
 
-/* Operator variable is the structure seen in the operator
+/* OperatorVariable is the structure seen in the operator
  * definitions that defines the structure of that overload.
  *
  * Example:
@@ -46,8 +46,11 @@ struct PairVariable : public OperatorVariable {
 
 /* Operator bodies.
  * A PairBody is used in the same way as a PairVariable, but there
- * is no need to use braces. Braces are used to force priority; thus
- * the need for separate SequencedBody from TerminalBody. */
+ * is no need to use braces. Braces are used to force priority.
+ * SequenceBody is used to aggregate sequential expressions.
+ * To represent nesting, an element in the sequence can mean
+ * either a sequence Token (Token::sequence) or a nested operator
+ * body. */
 struct OperatorBody : public Printable {
     virtual ~OperatorBody() = default;
 };
@@ -58,13 +61,8 @@ struct PairBody : public OperatorBody {
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
-struct SequencedBody : public OperatorBody {
-    std::vector<std::unique_ptr<OperatorBody>> sequence;
-    virtual std::ostream& print_to( std::ostream& ) const override;
-};
-
-struct TerminalBody : public OperatorBody {
-    Token value;
+struct SequenceBody : public OperatorBody {
+    std::vector< either<std::unique_ptr<OperatorBody>, Token> > sequence;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 

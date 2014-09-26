@@ -26,7 +26,8 @@ struct Lexer {
     Lexer( const char * filename );
 
     /* Reads the current token and advances the state of the lexer.
-     * Can only be executed if has_next() returns true. */
+     * Returns an invalid result (a token with null id) if has_next()
+     * returns false. */
     auto next() {
         Token tmp = _next;
         compute_next();

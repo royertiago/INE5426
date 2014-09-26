@@ -13,6 +13,7 @@ struct Token {
         NUM = 1,
         INCLUDE,
         CATEGORY,
+
         IDENTIFIER,
         STRING,
 
@@ -60,6 +61,37 @@ struct Token {
             case COMMA:      return "COMMA";
             case RBRACE:     return "RBRACE";
             default:         return "unknown token";
+        }
+    }
+
+    /* Useful queries about tokens */
+
+    /* Declarator: a token that can start a declaration. */
+    static bool declarator( const Token & tok ) {
+        switch( tok.id ) {
+            case INCLUDE:
+            case CATEGORY:
+            case F:
+            case FX:
+            case FY:
+            case XF:
+            case YF:
+            case XFX:
+            case YFX:
+            case XFY:
+                return true;
+            default: return false;
+        }
+    }
+
+    /* Sequence: tokens that can appear in sequence in a operator body. */
+    static bool sequence( const Token & tok ) {
+        switch( tok.id ) {
+            case NUM:
+            case IDENTIFIER:
+            case STRING:
+                return true;
+            default: return false;
         }
     }
 };

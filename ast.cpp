@@ -1,5 +1,7 @@
 /* ast.cpp
  * Implementation of ast.h
+ * The only functions implemented here are the "print_to", inherited
+ * from Printable.
  */
 #include "ast.h"
 
@@ -19,17 +21,16 @@ std::ostream& PairBody::print_to( std::ostream& os ) const {
     return os << '{' << *first << ", " << *second << '}';
 }
 
-std::ostream& SequencedBody::print_to( std::ostream& os ) const {
+std::ostream& SequenceBody::print_to( std::ostream& os ) const {
     const char * separator = "";
-    for( auto& ptr : sequence ) {
-        os << separator << *ptr;
+    for( auto& e : sequence ) {
+        if( e.is<Token>() )
+            os << separator << e.get<Token>();
+        else
+            os << separator << *e.get<std::unique_ptr<OperatorBody>>();
         separator = " ";
     }
     return os;
-}
-
-std::ostream& TerminalBody::print_to( std::ostream& os ) const {
-    return os << value;
 }
 
 std::ostream& IncludeCommand::print_to( std::ostream& os ) const {
