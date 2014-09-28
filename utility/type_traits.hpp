@@ -22,12 +22,15 @@ struct unqualified {
     >::type type;
 };
 
+template< typename T >
+using unqualified_t = typename unqualified<T>::type;
+
 /* dependant_false é uma estrutura que se comporta
  * de maneira idêntica a std::false_type, entretanto,
  * ela depende de um parâmetro do template.
  *
  * Isso permite formalizar
- *  static_assert( false, "Não insancie com T genérico!" ); */
+ *  static_assert( false, "Não instancie com T genérico!" ); */
 template< typename T >
 struct dependant_false : std::false_type {};
 

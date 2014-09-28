@@ -24,8 +24,9 @@ class either {
 public:
     /* Constrói a classe com o tipo especificado. */
     template< typename T,
-        typename = typename std::enable_if<
-            mp::type_index< typename unqualified<T>::type, Ts...>::value != -1u
+        typename Unqualified = typename std::enable_if<
+            mp::type_index< unqualified_t<T>, Ts...>::value != -1u,
+            unqualified_t<T>
         >::type
     >
     either( T&& t );
@@ -43,8 +44,9 @@ public:
     /* Atribuição de qualquer dos dois tipos de objeto.
      * Caso o tipo interno do objeto mude, o objeto atual é destruído. */
     template< typename T,
-        typename = typename std::enable_if<
-            mp::type_index<T, Ts...>::value != -1u
+        typename Unqualified = typename std::enable_if<
+            mp::type_index< unqualified_t<T>, Ts...>::value != -1u,
+            unqualified_t<T>
         >::type
     >
     either& operator=( T&& );
@@ -61,8 +63,9 @@ public:
      * São ignorados erros caso o tipo interno seja diferente do operador
      * de conversão especificado. */
     template< typename T,
-        typename = typename std::enable_if<
-            mp::type_index<T, Ts...>::value != -1u
+        typename Unqualified = typename std::enable_if<
+            mp::type_index< unqualified_t<T>, Ts...>::value != -1u,
+            unqualified_t<T>
         >::type
     >
     operator T() const;
@@ -104,11 +107,11 @@ typename either<Ts...>::destructor either<Ts...>::destroy[sizeof...(Ts)] = {
 };
 
 // Construtor - a partir de elemento
-template< typename ... Ts > template< typename T, typename >
+template< typename ... Ts > template< typename T, typename Unqualified >
 either<Ts...>::either( T&& t ) :
-    type( mp::type_index<T, Ts...>::value )
+    type( mp::type_index<Unqualified, Ts...>::value )
 {
-    new(&value) T( std::forward<T>( t ) );
+    new(&value) Unqualified( std::forward<T>( t ) );
 }
 
 // Construtor padrão
@@ -120,10 +123,17 @@ either<Ts...>::either() :
 }
 
 // Construtor de cópia/movimento
-template< typename ... Ts >
+template< typename ... Ts>
 either<Ts...>::either( const either<Ts...>& e ) :
     type( e.type )
 {
+    static_assert(
+        mp::logical_and<
+            std::is_copy_constructible<Ts>::value...
+        >::value, 
+        "either<> can only be copy-constructed "
+        "if every template parameter can be copy-constructed."
+    );
     typedef void (*f)( void *, const void * );
     static f copy_construct[sizeof...(Ts)] = {
         either_helper::copy_construct<Ts>...
@@ -131,10 +141,17 @@ either<Ts...>::either( const either<Ts...>& e ) :
     copy_construct[type]( &value, &e.value );
 }
 
-template< typename ... Ts >
+template< typename ... Ts>
 either<Ts...>::either( either<Ts...>&& e ) :
     type( e.type )
 {
+    static_assert(
+        mp::logical_and<
+            std::is_move_constructible<Ts>::value...
+        >::value, 
+        "either<> can only be move-constructed "
+        "if every template parameter can be move-constructed."
+    );
     typedef void (*f)( void *, void * );
     static f move_construct[sizeof...(Ts)] = {
         either_helper::move_construct<Ts>...
@@ -149,14 +166,14 @@ either<Ts...>::~either() {
 }
 
 // Atribuição de T's
-template< typename ... Ts > template< typename T, typename >
+template< typename ... Ts > template< typename T, typename Unqualified >
 either<Ts...>& either<Ts...>::operator=( T&& t ) {
-    if( type == mp::type_index<T, Ts...>::value ) {
-        *(T*)&value = std::forward<T>(t);
+    if( type == mp::type_index<Unqualified, Ts...>::value ) {
+        *(Unqualified*)&value = std::forward<T>(t);
     } else {
         destroy[type]( &value );
-        new(&value) T( std::forward<T>(t) );
-        type = mp::type_index<T, Ts...>::value;
+        new(&value) Unqualified( std::forward<T>(t) );
+        type = mp::type_index<Unqualified, Ts...>::value;
     }
     return *this;
 }
@@ -164,6 +181,22 @@ either<Ts...>& either<Ts...>::operator=( T&& t ) {
 // Atribuição de either's
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
+    static_assert(
+        mp::logical_and<
+            std::is_copy_assignable<Ts>::value...
+        >::value, 
+        "either<> can only be copy-assigned "
+        "if every template parameter can be copy-assigned."
+    );
+    static_assert(
+        mp::logical_and<
+            std::is_move_constructible<Ts>::value...
+        >::value, 
+        "either<> can only be copy-assigned "
+        "if every template parameter can be copy-constructed, "
+        "since if the types do not match we need to destroy "
+        "the previous value and copy-construct a new one."
+    );
     typedef void (*f)( void *, const void * );
     static f copy_assign[sizeof...(Ts)] = {
         either_helper::copy_assign<Ts>...
@@ -184,6 +217,22 @@ either<Ts...>& either<Ts...>::operator=( const either<Ts...>& e ) {
 
 template< typename ... Ts >
 either<Ts...>& either<Ts...>::operator=( either<Ts...>&& e ) {
+    static_assert(
+        mp::logical_and<
+            std::is_move_assignable<Ts>::value...
+        >::value, 
+        "either<> can only be move-assigned "
+        "if every template parameter can be move-assigned."
+    );
+    static_assert(
+        mp::logical_and<
+            std::is_move_constructible<Ts>::value...
+        >::value, 
+        "either<> can only be move-assigned "
+        "if every template parameter can be move-constructed, "
+        "since if the types do not match we need to destroy "
+        "the previous value and move-construct a new one."
+    );
     typedef void (*f)( void *, void * );
     static f move_assign[sizeof...(Ts)] = {
         either_helper::move_assign<Ts>...
@@ -208,9 +257,9 @@ bool either<Ts...>::is() const {
     return type == mp::type_index<T, Ts...>::value;
 }
 
-template< typename ... Ts > template< typename T, typename >
+template< typename ... Ts > template< typename T, typename Unqualified >
 either<Ts...>::operator T() const {
-    return *(T*) &value;
+    return *(Unqualified*) &value;
 }
 
 template< typename ... Ts > template< typename T >

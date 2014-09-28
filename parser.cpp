@@ -19,7 +19,7 @@ namespace {
     std::unique_ptr<OperatorDefinition> parse_operator( Lexer& );
 
     /* Parse a variable definition, in operator headers. */
-    std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
+//   std::unique_ptr<OperatorVariable> parse_variable( Lexer& ); FIXME
 
     /* Parse an operator body. */
     std::unique_ptr<OperatorBody> parse_body( Lexer& );
@@ -81,11 +81,12 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     if( alex.peek().id != Token::NUM ) throw parse_error( "Expected priority", alex.next() );
     ptr->priority = std::atoi(alex.next().lexeme.c_str());
 
-    for( char c : ptr->format )
-        if( c == 'f' )
-            ptr->names.push_back( alex.next() );
-        else
-            ptr->names.push_back( parse_variable( alex ) );
+
+//  for( char c : ptr->format )
+//      if( c == 'f' )
+//          ptr->names.emplace_back( alex.next() );
+//      else
+//          ptr->names.emplace_back( parse_variable( alex ) );
 
     ptr->body = parse_body( alex );
     if( alex.peek().id == '}' )
@@ -95,20 +96,16 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     return std::move( ptr );
 }
 
-std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
-    return nullptr; // FIXME: implement
-}
-
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
     auto ptr = std::make_unique<SequenceBody>();
     Token tok;
     while( true ) {
         tok = alex.next();
-        if( Token::sequence(tok) )
-            // TODO: inplicit either conversion
-            ptr->sequence.push_back( either<std::unique_ptr<OperatorBody>,Token>(tok) );
+        if( Token::sequence(tok) ) {
+            // ptr->sequence.emplace_back( tok ); FIXME
+        }
         else if( tok.id == '{' ) {
-            ptr->sequence.push_back( parse_body(alex) );
+            // ptr->sequence.emplace_back( parse_body(alex) ); FIXME
             if( alex.next().id != '}' )
                 throw parse_error( "Left brace never closed", tok );
         } else
@@ -121,9 +118,9 @@ std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
         auto rptr = std::make_unique<PairBody>();
         rptr->first = std::move( ptr ),
         rptr->second = parse_body( alex );
-        return rptr;
+        return std::move(rptr);
     }
-    return ptr;
+    return std::move(ptr);
 }
 
 } // anonymous namespace
