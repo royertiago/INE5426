@@ -5,7 +5,11 @@
  */
 #include "ast.h"
 
-std::ostream& GenericVariable::print_to( std::ostream& os ) const {
+std::ostream& OperatorName::print_to( std::ostream& os ) const {
+    return os << name;
+}
+
+std::ostream& NamedVariable::print_to( std::ostream& os ) const {
     return os << name;
 }
 
@@ -24,13 +28,14 @@ std::ostream& PairBody::print_to( std::ostream& os ) const {
 std::ostream& SequenceBody::print_to( std::ostream& os ) const {
     const char * separator = "";
     for( auto& e : sequence ) {
-        if( e.is<Token>() )
-            os << separator << e.get<Token>();
-        else
-            os << separator << *e.get<std::unique_ptr<OperatorBody>>();
+        os << separator << *e;
         separator = " ";
     }
     return os;
+}
+
+std::ostream& TerminalBody::print_to( std::ostream& os ) const {
+    return os << name;
 }
 
 std::ostream& IncludeCommand::print_to( std::ostream& os ) const {
@@ -44,12 +49,8 @@ std::ostream& CategoryDefinition::print_to( std::ostream& os ) const {
 std::ostream& OperatorDefinition::print_to( std::ostream& os ) const {
     os << priority << '/' << format << '\n';
     const char * separator = "";
-    for( auto& either : names ) {
-        os << separator;
-        if( either.is<Token>() )
-            os << either.get<Token>();
-        else
-            os << *either.get< std::unique_ptr<OperatorVariable> >();
+    for( auto& e : names ) {
+        os << separator << *e;
         separator = " ";
     }
     os << '\n';

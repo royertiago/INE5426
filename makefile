@@ -1,5 +1,5 @@
 CXX := /usr/lib/gcc-snapshot/bin/g++
-CXXFLAGS := -std=c++1y -Wall -Wextra -pedantic -Werror -g
+CXXFLAGS := -std=c++1y -Wall -Wextra -Werror -g
 
 # Library definitions
 # ILIBS is the compiler-flags-version of LIBS
@@ -19,10 +19,10 @@ OBJ		:= $(filter-out %$(MAIN:.cpp=.o), $(MOBJ))
 # TOBJ: test objects, MOBJ: main objects.
 # OBJ contains all main objects, but without main.o, that defines "int main()".
 
-all: a.out test/test
-
 a.out: $(MOBJ)
 	$(CXX) $^
+
+all: a.out test
 
 test: test/test
 	test/test

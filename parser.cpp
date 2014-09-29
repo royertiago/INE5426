@@ -19,7 +19,7 @@ namespace {
     std::unique_ptr<OperatorDefinition> parse_operator( Lexer& );
 
     /* Parse a variable definition, in operator headers. */
-//   std::unique_ptr<OperatorVariable> parse_variable( Lexer& ); FIXME
+    std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
 
     /* Parse an operator body. */
     std::unique_ptr<OperatorBody> parse_body( Lexer& );
@@ -82,11 +82,11 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     ptr->priority = std::atoi(alex.next().lexeme.c_str());
 
 
-//  for( char c : ptr->format )
-//      if( c == 'f' )
-//          ptr->names.emplace_back( alex.next() );
-//      else
-//          ptr->names.emplace_back( parse_variable( alex ) );
+    for( char c : ptr->format )
+        if( c == 'f' )
+            ptr->names.emplace_back( std::make_unique<OperatorName>(alex.next()) );
+        else
+            ptr->names.emplace_back( std::move(parse_variable( alex )) );
 
     ptr->body = parse_body( alex );
     if( alex.peek().id == '}' )
@@ -96,30 +96,29 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     return std::move( ptr );
 }
 
+std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
+    return nullptr; // FIXME
+}
+
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
     auto ptr = std::make_unique<SequenceBody>();
     Token tok;
     while( true ) {
         tok = alex.next();
-        if( Token::sequence(tok) ) {
-            // ptr->sequence.emplace_back( tok ); FIXME
-        }
+        if( Token::sequence(tok) )
+            ptr->sequence.emplace_back( std::make_unique<TerminalBody>(tok) );
         else if( tok.id == '{' ) {
-            // ptr->sequence.emplace_back( parse_body(alex) ); FIXME
+            ptr->sequence.emplace_back( std::move(parse_body(alex)) );
             if( alex.next().id != '}' )
                 throw parse_error( "Left brace never closed", tok );
-        } else
+        }
+        else
             break;
     }
     if( ptr->sequence.empty() )
         throw parse_error( "Invalid empty token sequence", tok );
-    if( tok.id == ',' ) {
-        // TODO: implicit conversion
-        auto rptr = std::make_unique<PairBody>();
-        rptr->first = std::move( ptr ),
-        rptr->second = parse_body( alex );
-        return std::move(rptr);
-    }
+    if( tok.id == ',' )
+        return std::make_unique<PairBody>( std::move(ptr), parse_body(alex) );
     return std::move(ptr);
 }
 
