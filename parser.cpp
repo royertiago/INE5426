@@ -36,6 +36,32 @@ namespace {
     }
 }
 
+Parser::Parser( const char * filename ) :
+    _alex( filename ),
+    _next( nullptr )
+{}
+
+std::unique_ptr<Statement> Parser::next() {
+    if( !_next )
+        compute_next();
+    return std::move(_next);
+}
+
+const Statement * Parser::peek() {
+    if( !_next )
+        compute_next();
+    return _next.get();
+}
+
+bool Parser::has_next() const {
+    return _alex.has_next();
+}
+
+void Parser::panic() {
+    while( _alex.has_next() && !Token::declarator(_alex.peek()) )
+        _alex.next();
+}
+
 void Parser::compute_next() {
     if( !_alex.has_next() ) {
         _next = nullptr;

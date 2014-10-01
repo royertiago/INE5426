@@ -15,36 +15,21 @@
 #include "ast.h"
 
 struct Parser {
-    Parser( const char * filename ) :
-        _alex( filename ),
-        _next( nullptr )
-    {}
+    Parser( const char * filename );
 
-    std::unique_ptr<Statement> next() {
-        if( !_next && _alex.has_next() )
-            compute_next();
-
-        auto tmp = std::move(_next);
-        compute_next();
-        return std::move(tmp);
-    }
+    /* The unique pointer ownership is transferred. */
+    std::unique_ptr<Statement> next();
 
     /* The returned pointer should not be deleted. */
-    const Statement * peek() {
-        if( !_next )
-            compute_next();
-        return _next.get();
-    }
+    const Statement * peek();
 
-    bool has_next() const {
-        return _alex.has_next();
-    }
+    /* Determines if there is more tokens to be parsed.
+     * The functions next() and peek() shall only be
+     * called if has_next() returns true. */
+    bool has_next() const;
 
     /* Error-recovering mode. */
-    void panic() {
-        while( _alex.has_next() && !Token::declarator(_alex.peek()) )
-            _alex.next();
-    }
+    void panic();
 
 private:
     Lexer _alex;
