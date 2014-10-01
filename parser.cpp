@@ -91,7 +91,7 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     ptr->body = parse_body( alex );
     if( alex.peek().id == '}' )
         throw parse_error( "Right brace never opened", alex.next() );
-    if( alex.has_next() && Token::declarator(alex.peek() ) )
+    if( alex.has_next() && !Token::declarator(alex.peek()) )
         throw parse_error( "Unfinished operator body", alex.next() );
     return std::move( ptr );
 }
@@ -102,23 +102,26 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
 
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
     auto ptr = std::make_unique<SequenceBody>();
-    Token tok;
     while( true ) {
-        tok = alex.next();
-        if( Token::sequence(tok) )
-            ptr->sequence.emplace_back( std::make_unique<TerminalBody>(tok) );
-        else if( tok.id == '{' ) {
+        if( Token::sequence(alex.peek()) )
+            ptr->sequence.emplace_back( std::make_unique<TerminalBody>(alex.next()) );
+        else if( alex.peek().id == '{' ) {
+            Token tok = alex.next();
             ptr->sequence.emplace_back( std::move(parse_body(alex)) );
-            if( alex.next().id != '}' )
+            if( alex.peek().id != '}' )
                 throw parse_error( "Left brace never closed", tok );
+            else
+                alex.next();
         }
         else
             break;
     }
     if( ptr->sequence.empty() )
-        throw parse_error( "Invalid empty token sequence", tok );
-    if( tok.id == ',' )
+        throw parse_error( "Invalid empty token sequence", alex.peek() );
+    if( alex.peek().id == ',' ) {
+        alex.next();
         return std::make_unique<PairBody>( std::move(ptr), parse_body(alex) );
+    }
     return std::move(ptr);
 }
 
