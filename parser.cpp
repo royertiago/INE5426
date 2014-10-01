@@ -21,6 +21,11 @@ namespace {
     /* Parse a variable definition, in operator headers. */
     std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
 
+    /* Parse the sequence "comma-variable-comma-variable-comma-variable"...
+     * in a variable definition that must be structured in pairs.
+     * The parsing starts after a comma. */
+    std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& );
+
     /* Parse an operator body. */
     std::unique_ptr<OperatorBody> parse_body( Lexer& );
 }
@@ -48,7 +53,7 @@ void Parser::compute_next() {
                 _next = parse_operator( _alex );
                 return;
         default:
-                throw parse_error( "Expected include, category or operator", _alex.next() );
+                throw parse_error( "Expected include, category or operator", _alex.peek() );
     }
 }
 
@@ -57,7 +62,7 @@ namespace {
 std::unique_ptr<IncludeCommand> parse_include( Lexer& alex ) {
     alex.next();
     if( alex.peek().id != Token::IDENTIFIER )
-        throw parse_error( "Expected identifier after 'include' token", alex.next() );
+        throw parse_error( "Expected identifier after 'include' token", alex.peek() );
 
     auto ptr = std::make_unique<IncludeCommand>();
     ptr->filename = alex.next();
@@ -67,7 +72,7 @@ std::unique_ptr<IncludeCommand> parse_include( Lexer& alex ) {
 std::unique_ptr<CategoryDefinition> parse_category( Lexer& alex ) {
     alex.next();
     if( alex.peek().id != Token::IDENTIFIER )
-        throw parse_error( "Expected identifier after 'category' token", alex.next() );
+        throw parse_error( "Expected identifier after 'category' token", alex.peek() );
 
     auto ptr = std::make_unique<CategoryDefinition>();
     ptr->name = alex.next();
@@ -78,7 +83,7 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     auto ptr = std::make_unique<OperatorDefinition>();
     ptr->format = alex.next().lexeme;
 
-    if( alex.peek().id != Token::NUM ) throw parse_error( "Expected priority", alex.next() );
+    if( alex.peek().id != Token::NUM ) throw parse_error( "Expected priority", alex.peek() );
     ptr->priority = std::atoi(alex.next().lexeme.c_str());
 
 
@@ -90,14 +95,68 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
 
     ptr->body = parse_body( alex );
     if( alex.peek().id == '}' )
-        throw parse_error( "Right brace never opened", alex.next() );
+        throw parse_error( "Right brace never opened", alex.peek() );
     if( alex.has_next() && !Token::declarator(alex.peek()) )
-        throw parse_error( "Unfinished operator body", alex.next() );
+        throw parse_error( "Unfinished operator body", alex.peek() );
     return std::move( ptr );
 }
 
-std::unique_ptr<OperatorVariable> parse_variable( Lexer& ) {
-    return nullptr; // FIXME
+std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
+    if( alex.peek().id == Token::NUM )
+        return std::make_unique<NumberVariable>(alex.next());
+    if( alex.peek().id == Token::IDENTIFIER )
+        return std::make_unique<NamedVariable>(alex.next());
+    if( alex.peek().id != '{' )
+        throw parse_error( "Variable definitions must begin with left brace", alex.peek() );
+
+    Token open_brace = alex.next();
+
+    std::unique_ptr<OperatorVariable> lookahead; // Precisamos de um pouco de lookahead aqui
+
+    if( alex.peek().id == '{' )
+        lookahead = parse_variable( alex );
+    else {
+        Token tok;
+        if( alex.peek().id != Token::IDENTIFIER && alex.peek().id != Token::NUM )
+            throw parse_error( "Expected number or identifier after opening brace", alex.peek() );
+
+        tok = alex.next();
+        if( alex.peek().id == '}' ) {
+            alex.next();
+            if( tok.id == Token::IDENTIFIER )
+                return std::make_unique<RestrictedVariable>( tok );
+            throw parse_error( "Number variables need not be further restricted", tok );
+        }
+        if( tok.id == Token::NUM )
+            lookahead = std::make_unique<NumberVariable>( tok );
+        else
+            lookahead = std::make_unique<NamedVariable>( tok );
+    }
+    if( alex.peek().id != ',' )
+        throw parse_error( "Expected either comma or closing brace"
+                           " after identifier inside variable", alex.peek() );
+    alex.next();
+    std::unique_ptr<OperatorVariable> ptr = std::make_unique<PairVariable>(
+                                    std::move(lookahead), parse_variable_list(alex) );
+
+    if( alex.peek().id != '}' )
+        throw parse_error( "Left brace never closed", open_brace );
+
+    alex.next();
+    return std::move(ptr);
+}
+
+std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& alex ) {
+    std::unique_ptr<OperatorVariable> ptr = parse_variable( alex );
+
+    if( alex.peek().id != ',' ) {
+        if( alex.peek().id == '}' )
+            return std::move( ptr );
+        else
+            throw parse_error( "Expected either a comma or a closing brace", alex.peek() );
+    }
+    alex.next();
+    return std::make_unique<PairVariable>( std::move(ptr), parse_variable_list(alex) );
 }
 
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {

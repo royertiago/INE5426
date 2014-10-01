@@ -36,9 +36,18 @@ struct OperatorName : public SignatureToken {
  * The OperatorVariable is identified by {X, {Y}}. The outer
  * variable is an PairVariable. Its first value is an
  * GenericVariable, whose token refers to 'X'; the second
- * value of the pair is a NumericVariable, whose token is 'Y'.
+ * value of the pair is a RestrictedVariable, whose token is 'Y'.
  *
  * Tuples like {X, Y, Z, W} are a shorthand to {X, {Y, {Z, W}}}.
+ *
+ * In operator signatures, is also possible to appear numbers,
+ * as a way to restrict the input ("value overload"). For example,
+ *
+ *  xf 300 0 !
+ *      1
+ *
+ * This code defines 0 ! as 1. These variables are represented
+ * via class NumberVariable.
  */
 struct OperatorVariable : public SignatureToken {
     virtual ~OperatorVariable() = default;
@@ -51,9 +60,16 @@ struct NamedVariable : public OperatorVariable {
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
-struct NumericVariable : public OperatorVariable {
-    NumericVariable() = default;
-    NumericVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+struct RestrictedVariable : public OperatorVariable {
+    RestrictedVariable() = default;
+    RestrictedVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+    Token name;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+struct NumberVariable : public OperatorVariable {
+    NumberVariable() = default;
+    NumberVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };

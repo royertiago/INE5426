@@ -15,8 +15,8 @@ void lexical_analysis( const char * filename ) {
 }
 
 void syntactic_analysis( const char * filename ) {
-    Parser parser( filename );
     try {
+        Parser parser( filename );
         while( parser.has_next() )
             std::cout << *parser.next() << '\n';
     } catch ( parse_error& ex ) {

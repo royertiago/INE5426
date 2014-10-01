@@ -6,19 +6,23 @@
 #include "ast.h"
 
 std::ostream& OperatorName::print_to( std::ostream& os ) const {
-    return os << name;
+    return os << "{OpName}" << name;
 }
 
 std::ostream& NamedVariable::print_to( std::ostream& os ) const {
-    return os << name;
+    return os << "{NamedVar} " << name;
 }
 
-std::ostream& NumericVariable::print_to( std::ostream& os ) const {
-    return os << '{' << name << '}';
+std::ostream& RestrictedVariable::print_to( std::ostream& os ) const {
+    return os << "{{RestrictedVar} " << name << '}';
+}
+
+std::ostream& NumberVariable::print_to( std::ostream& os ) const {
+    return os << "{{NumberVar} " << name << '}';
 }
 
 std::ostream& PairVariable::print_to( std::ostream& os ) const {
-    return os << '{' << *first << ", " << *second << '}';
+    return os << "{{PairVar} " << *first << ", " << *second << '}';
 }
 
 std::ostream& PairBody::print_to( std::ostream& os ) const {
