@@ -15,13 +15,14 @@ void lexical_analysis( const char * filename ) {
 }
 
 void syntactic_analysis( const char * filename ) {
-    try {
-        Parser parser( filename );
-        while( parser.has_next() )
+    Parser parser( filename );
+    while( parser.has_next() )
+        try {
             std::cout << *parser.next() << '\n';
-    } catch ( parse_error& ex ) {
-        std::cerr << ex.what() << ' ' << ex.where.line << ':' << ex.where.column << '\n';
-    }
+        } catch ( parse_error& ex ) {
+            parser.panic();
+            std::cerr << ex.what() << ' ' << ex.where.line << ':' << ex.where.column << '\n';
+        }
 }
 
 int main( int argc, char * argv[] ) {

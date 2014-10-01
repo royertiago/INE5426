@@ -28,6 +28,12 @@ namespace {
 
     /* Parse an operator body. */
     std::unique_ptr<OperatorBody> parse_body( Lexer& );
+
+    /* Converts an string to a tuple. */
+    template< typename Pair >
+    std::unique_ptr<Pair> string_to( Token tok ) {
+        throw parse_error( "Unimplemented feature (string to tuple conversion).", tok );
+    }
 }
 
 void Parser::compute_next() {
@@ -106,6 +112,8 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
         return std::make_unique<NumberVariable>(alex.next());
     if( alex.peek().id == Token::IDENTIFIER )
         return std::make_unique<NamedVariable>(alex.next());
+    if( alex.peek().id == Token::STRING )
+        return string_to<PairVariable>(alex.next());
     if( alex.peek().id != '{' )
         throw parse_error( "Variable definitions must begin with left brace", alex.peek() );
 
@@ -117,8 +125,8 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
         lookahead = parse_variable( alex );
     else {
         Token tok;
-        if( alex.peek().id != Token::IDENTIFIER && alex.peek().id != Token::NUM )
-            throw parse_error( "Expected number or identifier after opening brace", alex.peek() );
+        if( !Token::sequence(alex.peek()) )
+            throw parse_error( "Expected string, number or identifier after opening brace", alex.peek() );
 
         tok = alex.next();
         if( alex.peek().id == '}' ) {
@@ -129,8 +137,10 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
         }
         if( tok.id == Token::NUM )
             lookahead = std::make_unique<NumberVariable>( tok );
-        else
+        else if( tok.id == Token::IDENTIFIER )
             lookahead = std::make_unique<NamedVariable>( tok );
+        else
+            lookahead = string_to<PairVariable>( tok );
     }
     if( alex.peek().id != ',' )
         throw parse_error( "Expected either comma or closing brace"
@@ -162,8 +172,12 @@ std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& alex ) {
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
     auto ptr = std::make_unique<SequenceBody>();
     while( true ) {
-        if( Token::sequence(alex.peek()) )
-            ptr->sequence.emplace_back( std::make_unique<TerminalBody>(alex.next()) );
+        if( Token::sequence(alex.peek()) ) {
+            if( alex.peek().id == Token::STRING )
+                ptr->sequence.emplace_back( string_to<PairBody>(alex.next()) );
+            else
+                ptr->sequence.emplace_back( std::make_unique<TerminalBody>(alex.next()) );
+        }
         else if( alex.peek().id == '{' ) {
             Token tok = alex.next();
             ptr->sequence.emplace_back( std::move(parse_body(alex)) );

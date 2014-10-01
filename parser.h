@@ -18,23 +18,32 @@ struct Parser {
     Parser( const char * filename ) :
         _alex( filename ),
         _next( nullptr )
-    {
-        compute_next();
-    }
+    {}
 
     std::unique_ptr<Statement> next() {
+        if( !_next && _alex.has_next() )
+            compute_next();
+
         auto tmp = std::move(_next);
         compute_next();
         return std::move(tmp);
     }
 
     /* The returned pointer should not be deleted. */
-    const Statement * peek() const {
+    const Statement * peek() {
+        if( !_next )
+            compute_next();
         return _next.get();
     }
 
     bool has_next() const {
-        return _next.operator bool();
+        return _alex.has_next();
+    }
+
+    /* Error-recovering mode. */
+    void panic() {
+        while( _alex.has_next() && !Token::declarator(_alex.peek()) )
+            _alex.next();
     }
 
 private:

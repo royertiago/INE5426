@@ -35,14 +35,14 @@ struct Lexer {
     }
 
     /* True if there are at least one more token to be read. */
-    auto has_next() {
+    auto has_next() const {
         return _next.id != 0;
     }
 
     /* Reads the current token, without advancing the state of
      * the lexer.
      * Can only be executed if has_next() returns true. */
-    auto peek() {
+    auto peek() const {
         return _next;
     }
 
