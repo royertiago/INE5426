@@ -31,10 +31,10 @@ namespace {
 
     /* Converts an string to a tuple. */
     template< typename Pair >
-    std::unique_ptr<Pair> string_to( Token tok ) {
+    std::unique_ptr<Pair> string_to_tuple( Token tok ) {
         throw parse_error( "Unimplemented feature (string to tuple conversion).", tok );
     }
-}
+} // anonymous namespace
 
 Parser::Parser( const char * filename ) :
     _alex( filename ),
@@ -139,7 +139,7 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
     if( alex.peek().id == Token::IDENTIFIER )
         return std::make_unique<NamedVariable>(alex.next());
     if( alex.peek().id == Token::STRING )
-        return string_to<PairVariable>(alex.next());
+        return string_to_tuple<PairVariable>(alex.next());
     if( alex.peek().id != '{' )
         throw parse_error( "Variable definitions must begin with left brace", alex.peek() );
 
@@ -166,7 +166,7 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
         else if( tok.id == Token::IDENTIFIER )
             lookahead = std::make_unique<NamedVariable>( tok );
         else
-            lookahead = string_to<PairVariable>( tok );
+            lookahead = string_to_tuple<PairVariable>( tok );
     }
     if( alex.peek().id != ',' )
         throw parse_error( "Expected either comma or closing brace"
@@ -200,7 +200,7 @@ std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
     while( true ) {
         if( Token::sequence(alex.peek()) ) {
             if( alex.peek().id == Token::STRING )
-                ptr->sequence.emplace_back( string_to<PairBody>(alex.next()) );
+                ptr->sequence.emplace_back( string_to_tuple<PairBody>(alex.next()) );
             else
                 ptr->sequence.emplace_back( std::make_unique<TerminalBody>(alex.next()) );
         }

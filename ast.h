@@ -91,7 +91,12 @@ struct PairVariable : public OperatorVariable {
  * SequenceBody is used to aggregate sequential expressions.
  * To represent nesting, an element in the sequence can mean
  * either a sequence Token (Token::sequence) or a nested operator
- * body. */
+ * body.
+ *
+ * SequenceBody and TerminalBody are used in the parsing only; semantical
+ * analysis take care of changing all of these to VariableBody (a named
+ * reference to a local variable), NumericBody (a number constant) and
+ * TreeNodeBody (a mangled name of an operator and its arguments). */
 struct OperatorBody : public Printable {
     virtual ~OperatorBody() = default;
 };
@@ -116,6 +121,55 @@ struct TerminalBody : public OperatorBody {
     TerminalBody() = default;
     TerminalBody( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+struct VariableBody : public OperatorBody {
+    VariableBody() = default;
+    VariableBody( auto&& t ) : name(AUX_FORWARD(t)) {}
+    Token name;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+struct NumericBody : public OperatorBody {
+    NumericBody() = default;
+    NumericBody( auto&& t ) : value(AUX_FORWARD(t)) {}
+    int value;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+/* These structures are computed by the semantic analyzer.
+ * Note that there is no need to differentiate between prefix
+ * and postfix unary operators because all the semantic analysis
+ * is already done when these structures are generated. */
+struct TreeNodeBody : public OperatorBody {
+    TreeNodeBody() = default;
+    std::string mangled_name;
+    TreeNodeBody( auto&& name ) : mangled_name(AUX_FORWARD(t)) {}
+};
+
+struct NullaryTreeBody : public TreeNodeBody {
+    NullaryTreeBody() = default;
+    NullaryTreeBody( auto&& t ) : TreeNodeBody(AUX_FORWARD(t)) {}
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+struct UnaryTreeBody : public TreeNodeBody {
+    UnaryTreeBody() = default;
+    UnaryTreeBody( auto&& name, auto&& variable ) :
+        TreeNodeBody(AUX_FORWARD(name)),
+        variable(AUX_FORWARD(variable))
+    {}
+    std::unique_ptr<OperatorBody> variable;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+struct BinaryTreeBody : public TreeNodeBody {
+    BinaryTreeNode() = default;
+    BinaryTreeNode( auto&& n, auto&& l, auto&& r ) :
+        TreeNodeBody(AUX_FORWARD(n)),
+        left(AUX_FORWARD(t)),
+        right(AUX_FORWARD(r))
+    {}
+    std::unique_ptr<OperatorBody> left, right;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
