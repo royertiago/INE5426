@@ -192,7 +192,7 @@ struct CategoryDefinition : public Statement {
 
 struct OperatorDefinition : public Statement {
     unsigned priority;
-    std::string format;
+    std::string format; // "F", "FX", "FY", "XFX", "YFX" etc.
     std::vector< std::unique_ptr<SignatureToken> > names;
     std::unique_ptr<OperatorBody> body;
     virtual std::ostream& print_to( std::ostream& ) const override;

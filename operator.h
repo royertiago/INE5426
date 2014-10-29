@@ -1,0 +1,70 @@
+/* operator.h
+ * Structure that holds the information about operators in the program.
+ *
+ * There are four operator types - nullary, prefix, postfix and binary -,
+ * differentiated by name mangling (see mangling.txt). Each operator
+ * can have several possible overloads. Each overload have a variable
+ * tree (that is used to resolve overload at runtime) and a corresponding
+ * body - an tree structure, produced by the "semantic-syntatic" analyzer.
+ */
+#ifndef OPERATOR_H
+#define OPERATOR_H
+
+#include "printable.h"
+#include "ast.h"
+#include "symbol.h"
+
+/* OperatorOverload contains all the information about a specific
+ * overload of an operator. The overloads are selected at runtime.
+ *
+ * OperatorOverload is a common base that have the body of the
+ * operator. The following three classes extend it to include
+ * information about the signature.
+ *
+ * Example: consider the following operator definition:
+ * xf 800 {7, X, {Y}} alce
+ *      7 + Y, X
+ *
+ * The body of this overload ('7 + Y, X') is stored in one instance
+ * of this class, while the signature ('{7, X, {Y}}') is stored in
+ * the derived class UnaryOverload.
+ *
+ * Note that there is no need of differentiating beetween prefix
+ * and postfix; all is done via mangling. */
+struct OperatorOverload : public Printable {
+    std::unique_ptr<OperatorBody> body;
+    /* Class invariant: the only instances in the tree below
+     * 'body' are TreeNodeBody, NumericBody, VariableBody
+     * and PairBody. In particular, TerminalBody and SequenceBody
+     * shall have had gone through semantic analysis and replaced
+     * with suitable instances of VariableBody and NumericBody,
+     * and of TreeNodeBody, respectively. */
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+struct NullaryOverload : public OperatorOverload {
+    // There is no signature.
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+
+struct UnaryOverload : public OperatorOverload {
+    std::unique_ptr<OperatorVariable> variable;
+    virtual std::ostream& print_to( std::ostream& ) const override;
+};
+struct BinaryOverload : public OperatorOverload {
+    std::unique_ptr<OperatorVariable> left;
+    std::unique_ptr<OperatorVariable> right;
+    virtual std::ostream& print_to( std::ostream& ) const override;  
+};
+
+template <typename Overload>
+struct Operator : public Symbol {
+    std::vector<Overload> overloads;
+    unsigned priority;
+};
+
+typedef Operator<NullaryOverload> NullaryOperator;
+typedef Operator<UnaryOverload> UnaryOperator;
+typedef Operator<BinaryOverload> BinaryOperator;
+
+#endif // OPERATOR_H
