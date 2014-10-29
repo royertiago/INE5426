@@ -25,7 +25,7 @@ public:
         position_iterator( Iterator() )
     {}
 
-    /* Basic operations: dereference, indirection, increment. */
+    /* Basic operations: dereference, indirection, increment, decrement. */
     auto operator*()        { return *_iterator; }
     auto operator*() const  { return *_iterator; }
     auto operator->()       { return _iterator.operator->(); }
@@ -36,7 +36,7 @@ public:
         if( *_iterator == '\n' ) {
             ++_line;
             _column = 1;
-        } 
+        }
         else
             ++_column;
 
@@ -47,17 +47,17 @@ public:
     /* Relational operators: == != < > <= >= 
      * Defined only if the respective iterator
      * defines. */
-#define POSITION_ITERATOR_FORWARD_OPERATOR(op)                  \
+#define AUX_FORWARD_OPERATOR(op)                                \
     friend bool operator op ( const position_iterator& lhs,     \
                               const position_iterator& rhs ) {  \
         return lhs._iterator op rhs._iterator;                  \
     }
-    POSITION_ITERATOR_FORWARD_OPERATOR(==)
-    POSITION_ITERATOR_FORWARD_OPERATOR(!=)
-    POSITION_ITERATOR_FORWARD_OPERATOR(<=)
-    POSITION_ITERATOR_FORWARD_OPERATOR(>=)
-    POSITION_ITERATOR_FORWARD_OPERATOR(< )
-    POSITION_ITERATOR_FORWARD_OPERATOR(> )
+    AUX_FORWARD_OPERATOR(==)
+    AUX_FORWARD_OPERATOR(!=)
+    AUX_FORWARD_OPERATOR(<=)
+    AUX_FORWARD_OPERATOR(>=)
+    AUX_FORWARD_OPERATOR(< )
+    AUX_FORWARD_OPERATOR(> )
 #undef POSITION_ITERATOR_FORWARD_OPERATOR
 
     /* Aditional functionality: retrieving current line and column */
@@ -70,13 +70,13 @@ namespace std {
     struct iterator_traits< position_iterator<Iterator> > :
         iterator_traits<Iterator>
     {
-        typedef typename conditional<
-            is_same<
-                typename iterator_traits<Iterator>::iterator_category,
-                random_access_iterator_tag
-            >::value,
-            bidirectional_iterator_tag,
-            typename iterator_traits<Iterator>::iterator_category
-        >::type iterator_category;
+        typedef forward_iterator_tag iterator_category;
+        /* Although we can use the relational operators <, >, <= and >=,
+         * decrementing might have linear cost in the distance between
+         * the beginning of the sequence and the current position: if
+         * we are at the beginning of the second line, after decrementing,
+         * to correctly have the _column count, we could have had to
+         * traverse the whole line to the first position, losing the O(1)
+         * characteristic of the iterator. */
     };
 } // namespace std
