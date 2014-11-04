@@ -145,7 +145,7 @@ struct NumericBody : public OperatorBody {
 struct TreeNodeBody : public OperatorBody {
     TreeNodeBody() = default;
     std::string mangled_name;
-    TreeNodeBody( auto&& name ) : mangled_name(AUX_FORWARD(t)) {}
+    TreeNodeBody( auto&& name ) : mangled_name(AUX_FORWARD(name)) {}
 };
 
 struct NullaryTreeBody : public TreeNodeBody {
@@ -163,10 +163,10 @@ struct UnaryTreeBody : public TreeNodeBody {
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 struct BinaryTreeBody : public TreeNodeBody {
-    BinaryTreeNode() = default;
-    BinaryTreeNode( auto&& n, auto&& l, auto&& r ) :
+    BinaryTreeBody() = default;
+    BinaryTreeBody( auto&& n, auto&& l, auto&& r ) :
         TreeNodeBody(AUX_FORWARD(n)),
-        left(AUX_FORWARD(t)),
+        left(AUX_FORWARD(l)),
         right(AUX_FORWARD(r))
     {}
     std::unique_ptr<OperatorBody> left, right;

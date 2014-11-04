@@ -1,6 +1,11 @@
 /* token.h
  * Struct that contains all the information pertinent to
  * a token of the language.
+ *
+ * Tokens are comparable - they form a total order. The comparison
+ * is done firstly by comparing the IDs and then by comparing the lexeme.
+ * The position of the token is irrelevant in such comparison;
+ * the ordering exists merely to imposes a total ordering in this class.
  */
 #ifndef TOKEN_H
 #define TOKEN_H
@@ -98,5 +103,13 @@ struct Token {
 
 // ostream printing
 std::ostream& operator<<( std::ostream&, const Token& );
+
+// Relational operators
+bool operator==( const Token&, const Token& );
+bool operator!=( const Token&, const Token& );
+bool operator<=( const Token&, const Token& );
+bool operator>=( const Token&, const Token& );
+bool operator< ( const Token&, const Token& );
+bool operator> ( const Token&, const Token& );
 
 #endif // TOKEN_H

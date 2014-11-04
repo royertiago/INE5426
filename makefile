@@ -19,10 +19,10 @@ OBJ		:= $(filter-out %$(MAIN:.cpp=.o), $(MOBJ))
 # TOBJ: test objects, MOBJ: main objects.
 # OBJ contains all main objects, but without main.o, that defines "int main()".
 
+all: a.out test/test
+
 a.out: $(MOBJ)
 	$(CXX) $^
-
-all: a.out test
 
 test: test/test
 	test/test
@@ -41,6 +41,7 @@ $(MOBJ) $(TOBJ): %.o : %.cpp
 .PHONY: clean veryclean test
 clean:
 	-find \( -name "*.o" -or -name "*.d" \) -exec rm '{}' \;
+	-rm -f test/test
 
 veryclean: clean
-	-rm a.out
+	-rm -f a.out
