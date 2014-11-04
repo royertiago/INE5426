@@ -1,5 +1,5 @@
-concepts.txt
-List of concepts used in the program.
+Concepts
+========
 
 Since the "concepts" feature of C++ was postponed until C++17,
 every concept used must be defined informally. This is the
@@ -8,13 +8,10 @@ along with the requirements of a class to satisfy them.
 
 
 JavaIterator
+------------
+
 Class that have the functions
+
     bool has_next()
     value next()
     value peek()
-
-Value Metafunction
-Struct that have a static constexpr attribute named "value".
-
-Type Metafunction
-Struct that have a typedef named 'type'.

@@ -1,5 +1,5 @@
-mangling.txt
-Informal definition about name mangling.
+Name Mangling
+=============
 
 In the C++ programming language, name mangling is a way to add type information
 of the parameters of a function, enabling overload in precompiled code.
