@@ -1,20 +1,23 @@
 " Vim syntax file to the language developed in INE5426 course.
 
-syntax match MustBeEmpty "."
+syntax match MustBeEmpty ".*"
 syntax match MustBeSpace "\S.*"
 syntax match None "."
 
 highlight clear None
 highlight link MustBeSpace Error
+highlight link MustBeEmpty Error
 " This is a trick to define Error matches only when specified in an nextgroup.
 " The first line defines Error as anything, and the second define None also
 " as anything. Since Error was defined before None, Vim will give preference
 " to the latter.
 " This behaviour also allow us to define other syntactic categories that will
 " override None.
-" Note that we must define both Error and None as "." and not as ".*" because
-" vim gives priority to items that started the match earlier, so Error would
-" override anything that did not start at the beginning of the line.
+"
+" Note that we must define both None as "." and not as ".*" because vim
+" gives priority to items that started the match earlier. Since the '*'
+" operator in vim regexes are greedy, None would override anything that
+" does not start at the beginning of the line.
 "
 " MustBeSpace is used for eror reporting; see below.
 " MustBeSpace and Error will be overriden by None, and will only gain priority
@@ -35,6 +38,6 @@ syntax match Keyword "^category\>"
 syntax match Number "\d\+"
 syntax match String "\"\(\\\"\|[^"]\|\n\)*\""
 
-syntax match Include "^include [^ \t\n\r\f\v{},]\+" nextgroup=Error
+syntax match Include "^include [^ 	{},]\+" nextgroup=MustBeEmpty
 
 syntax match Comment "\v^((include|class|category|xfx|xfy|yfx|xf|yf|fx|fy|f|) )@!.*"
