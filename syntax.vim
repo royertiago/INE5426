@@ -11,3 +11,7 @@ syntax match Keyword "^xfy\>"
 syntax match Keyword "^class\>"
 syntax match Keyword "^category\>"
 
+syntax match Number "\d\+"
+syntax match String "\"\(\\\"\|[^"]\|\n\)*\""
+
+syntax match Include "^include [^ \t\n\r\f\v{},]\+"
