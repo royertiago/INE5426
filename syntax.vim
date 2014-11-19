@@ -25,4 +25,6 @@ syntax match String "\"\(\\\"\|[^"]\|\n\)*\""
 
 syntax match Include "^include [^ \t\n\r\f\v{},]\+" nextgroup=Error
 
+syntax match Comment "^\(\(include\|class\|category\|f\|fx\|xf\|fy\|yf\|xfx\|xfy\|yfx\| \) \)\@!.*"
+
 highlight clear None
