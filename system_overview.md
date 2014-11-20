@@ -5,7 +5,7 @@ Take a look first at the file sample.txt to have an idea on how the
 language is intended to work.
 
 This documents explains how the lexical and syntatical analysis is done,
-and what is intended for the semantical analysis (that is still not 
+and what is intended for the semantical analysis (that is still not
 fully implemented).
 
 Other information about the system can be found at concepts.md,
@@ -46,9 +46,9 @@ Semantical Analysis
 ===================
 
 The semantical analysis is still in construction.
-    
+
 There are in important distiction between syntactical constructs
-(that are defined in file ast.h) and semantical constructs (that are defined 
+(that are defined in file ast.h) and semantical constructs (that are defined
 in other files in the program).
 
 This phase of the compiler performs transformations in the strucutres of ast.h

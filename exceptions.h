@@ -1,5 +1,5 @@
 /* exceptions.h
- * List of all exceptions thrown by the program. 
+ * List of all exceptions thrown by the program.
  */
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H

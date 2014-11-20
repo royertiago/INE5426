@@ -76,8 +76,8 @@ struct NumberVariable : public OperatorVariable {
 
 struct PairVariable : public OperatorVariable {
     PairVariable() = default;
-    PairVariable(auto&& first, auto&& second) : 
-        first(AUX_FORWARD(first)), 
+    PairVariable(auto&& first, auto&& second) :
+        first(AUX_FORWARD(first)),
         second(AUX_FORWARD(second))
     {}
     std::unique_ptr<OperatorVariable> first;
@@ -104,7 +104,7 @@ struct OperatorBody : public Printable {
 struct PairBody : public OperatorBody {
     PairBody() = default;
     PairBody(auto&& first, auto&& second) :
-        first(AUX_FORWARD(first)), 
+        first(AUX_FORWARD(first)),
         second(AUX_FORWARD(second))
     {}
     std::unique_ptr<OperatorBody> first;

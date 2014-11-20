@@ -54,7 +54,7 @@ struct UnaryOverload : public OperatorOverload {
 struct BinaryOverload : public OperatorOverload {
     std::unique_ptr<OperatorVariable> left;
     std::unique_ptr<OperatorVariable> right;
-    virtual std::ostream& print_to( std::ostream& ) const override;  
+    virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
 template <typename Overload>

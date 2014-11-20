@@ -162,7 +162,7 @@ category false
 category true
 
 cria duas constantes (false e true) que são numeradas a partir do zero;
-isto é, false é 0 e true é 1. O nome "category" vem do uso desta 
+isto é, false é 0 e true é 1. O nome "category" vem do uso desta
 palavra-chave para simular orientação a objetos:
 
 category IntegerPair

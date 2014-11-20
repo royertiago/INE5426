@@ -1,7 +1,7 @@
 /* symbol.h
  * Basic structure of the program.
  *
- * There are only four symbols: category, 
+ * There are only four symbols: category,
  * and nullary, unary and binary operators.
  */
 #ifndef SYMBOL_H

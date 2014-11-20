@@ -44,7 +44,7 @@ public:
         return *this;
     }
 
-    /* Relational operators: == != < > <= >= 
+    /* Relational operators: == != < > <= >=
      * Defined only if the respective iterator
      * defines. */
 #define AUX_FORWARD_OPERATOR(op)                                \

@@ -32,7 +32,7 @@ public:
     /* Throws an exception if either
      *  - type is F and there is a category with same name, or
      *  - such an operator already exists with different priority. */
-    void insertOverload( std::string name, int type, int priority, 
+    void insertOverload( std::string name, int type, int priority,
             OperatorOverload overload );
 
     bool existsBinaryOperator( std::string name ) const;

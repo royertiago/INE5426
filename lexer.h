@@ -17,7 +17,7 @@
 
 struct Lexer {
     /* Constructs the lexer to scan the contents of the specified file.
-     * The lexer should start "pointing" to the first token, that can be 
+     * The lexer should start "pointing" to the first token, that can be
      * readily retrieved via peek() or via next(); if this does not
      * happens, has_next() returns false (and conversely).
      *
