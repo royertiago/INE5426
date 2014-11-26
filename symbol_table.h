@@ -4,9 +4,10 @@
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
+#include <set>
 #include <string>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 #include "symbol.h"
 #include "operator.h"
 
@@ -52,4 +53,12 @@ public:
     int operatorPriority( std::string operator_name ) const;
 };
 
+/* Local symbol table used to store the operator variables. */
+class LocalSymbolTable {
+    std::set< std::string > table;
+
+public:
+    void insert( std::string symbol );
+    bool contains( std::string symbol ) const;
+};
 #endif // SYMBOL_TABLE_H

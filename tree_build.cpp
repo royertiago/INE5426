@@ -7,9 +7,7 @@ namespace {
     /* Builds the expression tree of the given operator body, changing every
      * SequenceBody and TerminalBody to suitable instances of VariableBody,
      * NumericBody and TreeNodeBody. */
-    std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody& ) {
-        return nullptr; // FIXME
-    }
+    std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody&, const LocalSymbolTable& );
 
 } // anonymous namespace
 

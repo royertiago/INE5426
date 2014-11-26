@@ -124,10 +124,12 @@ struct TerminalBody : public OperatorBody {
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
+/* These two structures are generated from TerminalBody
+ * during semantic analysis. */
 struct VariableBody : public OperatorBody {
     VariableBody() = default;
     VariableBody( auto&& t ) : name(AUX_FORWARD(t)) {}
-    Token name;
+    std::string name;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
