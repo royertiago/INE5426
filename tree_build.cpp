@@ -1,6 +1,8 @@
 /* tree_build.cpp
  * Implementation of tree_build.h.
  */
+#include <typeinfo>
+#include <typeindex>
 #include "tree_build.h"
 
 namespace {
@@ -47,4 +49,36 @@ std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def )
     ptr->right = std::make_unique<OperatorVariable>( *def.names[2] );
     ptr->body = std::move( buildExpressionTree(*def.body) );
     return std::move( ptr );
+}
+
+namespace {
+typedef std::unique_ptr<OperatorBody> (*ExpressionTreeBuilder)(
+        const OperatorBody&*,
+        const LocalSymbolTable&
+    );
+
+std::unique_ptr<OperatorBody> buildExpressionPairBody(
+        const OperatorBody& body,
+        const LocalSymbolTable& table );
+std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
+        const OperatorBody& body,
+        const LocalSymbolTable& table );
+std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
+        const OperatorBody& body,
+        const LocalSymbolTable& table );
+
+
+#define AUX_TYPE(type) {type_index(typeid(type)), buildExpression##type}
+std::unique_ptr<OperatorBody> buildExpressionTree(
+        const OperatorBody& body,
+        const LocalSymbolTable& table )
+{
+    std::map<type_index, ExpressionTreeBuilder> functions = {
+        AUX_TYPE(PairBody),
+        AUX_TYPE(SequenceBody),
+        AUX_TYPE(TerminalBody),
+    };
+    return std::move( functions.at(type_index(typeid(body)))(body, table) );
+}
+
 }
