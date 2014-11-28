@@ -58,17 +58,26 @@ typedef std::unique_ptr<OperatorBody> (*ExpressionTreeBuilder)(
     );
 
 std::unique_ptr<OperatorBody> buildExpressionPairBody(
-        const OperatorBody& body,
+        const PairBody& body,
         const LocalSymbolTable& table );
 std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
-        const OperatorBody& body,
+        const SequenceBody& body,
         const LocalSymbolTable& table );
 std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
-        const OperatorBody& body,
+        const TerminalBody& body,
         const LocalSymbolTable& table );
 
 
-#define AUX_TYPE(type) {type_index(typeid(type)), buildExpression##type}
+#define AUX_TYPE(type)                                                                      \
+    {                                                                                       \
+        type_index(typeid(type)),                                                           \
+        static_cast<ExpressionTreeBuilder>(                                                 \
+            []( const OperatorBody& body, const LocalSymbolTable& table ) {                 \
+                return std::move(buildExpression##type( dynamic_cast<type&>(body), table)); \
+            }                                                                               \
+        )                                                                                   \
+    }
+
 std::unique_ptr<OperatorBody> buildExpressionTree(
         const OperatorBody& body,
         const LocalSymbolTable& table )
