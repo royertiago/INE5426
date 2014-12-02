@@ -1,6 +1,7 @@
 /* tree_build.cpp
  * Implementation of tree_build.h.
  */
+#include <cstdlib>
 #include <typeinfo>
 #include <typeindex>
 #include "tree_build.h"
@@ -59,13 +60,30 @@ typedef std::unique_ptr<OperatorBody> (*ExpressionTreeBuilder)(
 
 std::unique_ptr<OperatorBody> buildExpressionPairBody(
         const PairBody& body,
-        const LocalSymbolTable& table );
+        const LocalSymbolTable& table )
+{
+    return std::make_unique<PairBody>(
+            std::move( buildExpressionTree(body.first) ),
+            std::move( buildExpressionTree(body.second) )
+            );
+}
 std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
         const SequenceBody& body,
         const LocalSymbolTable& table );
 std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
         const TerminalBody& body,
-        const LocalSymbolTable& table );
+        const LocalSymbolTable& table )
+{
+    if( body.name.id == NUM )
+        return std::make_unique<NumericBody>(
+                std::strtol( body.name.lexeme.begin(), 0, 10 ) // porque foda-se o Melga
+        );
+    if( table.contains( body.name.lexeme ) )
+        return std::make_unique<VariableBody>( body.name.lexeme );
+
+    throw semantic_error( "Terminal is not a number neiter a variable", body.name );
+    // TODO: maybe this behavior is unwanted according to buildExpressionSequenceBody.
+}
 
 
 #define AUX_TYPE(type)                                                                      \
