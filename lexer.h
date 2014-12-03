@@ -1,5 +1,6 @@
 /* lexer.h
- * Class that does the lexing phase of the compiler; it is a model of JavaIterator.
+ * Class that does the lexing phase of the interpreter;
+ * it is a model of JavaIterator.
  *
  * Although the lexing is done on demand, all the contents of the file are
  * read to a std::string on construction. This string is shared by

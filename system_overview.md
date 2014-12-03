@@ -51,7 +51,7 @@ There are in important distiction between syntactical constructs
 (that are defined in file ast.h) and semantical constructs (that are defined
 in other files in the program).
 
-This phase of the compiler performs transformations in the strucutres of ast.h
+This phase of the interpreter performs transformations in the strucutres of ast.h
 that were missing from syntatical analysis (since now we have the necessary
 knowledge about priorities and variables to reconstruct the syntax tree for
 every operator expression), resolve includes and category definitions and

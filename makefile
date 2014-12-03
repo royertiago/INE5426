@@ -2,7 +2,7 @@ CXX := /usr/lib/gcc-snapshot/bin/g++
 CXXFLAGS := -std=c++1y -Wall -Wextra -Werror -g
 
 # Library definitions
-# ILIBS is the compiler-flags-version of LIBS
+# ILIBS is the gcc-flags-version of LIBS
 LIBS := lexertl Catch Catch/single_include
 ILIBS := $(patsubst %, -isystem %/, $(LIBS) ) -I./
 
