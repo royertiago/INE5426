@@ -11,7 +11,7 @@
 
 struct Symbol {
     virtual ~Symbol() = default;
-    std::string mangled_name;
+    std::string name;
 };
 
 struct Category : public Symbol {

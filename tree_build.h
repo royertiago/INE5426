@@ -18,10 +18,4 @@ std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& );
 std::unique_ptr<UnaryOverload>   buildUnaryTree  ( const OperatorDefinition& );
 std::unique_ptr<BinaryOverload>  buildBinaryTree ( const OperatorDefinition& );
 
-/* Since an OperatorOverload does not holds the operator name, we need a
- * function to extract it separately.
- *
- * This function does the mangling corretly, according to mangling.md. */
-std::string getMangledOperatorName( const OperatorDefinition& );
-
 #endif // TREE_BUILD_H

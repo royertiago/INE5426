@@ -14,19 +14,6 @@ namespace {
 
 } // anonymous namespace
 
-
-std::string getMangledOperatorName( const OperatorDefinition& def ) {
-    if( def.format == "f" )
-        return dynamic_cast<const OperatorName&>(*def.names[0]).name.lexeme + ",F";
-    if( def.format == "fx" || def.format == "fy" )
-        return dynamic_cast<const OperatorName&>(*def.names[0]).name.lexeme + ",FX";
-    if( def.format == "xf" || def.format == "yf" )
-        return dynamic_cast<const OperatorName&>(*def.names[1]).name.lexeme + ",XF";
-    // It can only be xfx, yfx, xfy.
-    return dynamic_cast<const OperatorName&>(*def.names[1]).name.lexeme + ",XFX";
-}
-
-
 std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<NullaryOverload>();
     ptr->body = std::move( buildExpressionTree(*def.body) );

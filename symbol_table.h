@@ -14,8 +14,6 @@
 /* Global symbol table used in the program.
  * The symbol table stores and retrieves the symbols defined in the program;
  * namely, categories and operators.
- *
- * Name mangling is done internally by the class.
  */
 class GlobalSymbolTable {
     std::unordered_map<std::string, Symbol> table;

@@ -96,7 +96,7 @@ struct PairVariable : public OperatorVariable {
  * SequenceBody and TerminalBody are used in the parsing only; semantical
  * analysis take care of changing all of these to VariableBody (a named
  * reference to a local variable), NumericBody (a number constant) and
- * TreeNodeBody (a mangled name of an operator and its arguments). */
+ * TreeNodeBody (a reference to an operator and its arguments). */
 struct OperatorBody : public Printable {
     virtual ~OperatorBody() = default;
 };
@@ -145,33 +145,37 @@ struct NumericBody : public OperatorBody {
  * and postfix unary operators because all the semantic analysis
  * is already done when these structures are generated. */
 struct TreeNodeBody : public OperatorBody {
-    TreeNodeBody() = default;
-    std::string mangled_name;
-    TreeNodeBody( auto&& name ) : mangled_name(AUX_FORWARD(name)) {}
+    /* References to the operators are done via pointers.
+     * Since each pointer points to a different object type,
+     * it is better to mantain the pointer in each derived class
+     * rendering this class empty. */
 };
 
 struct NullaryTreeBody : public TreeNodeBody {
     NullaryTreeBody() = default;
-    NullaryTreeBody( auto&& t ) : TreeNodeBody(AUX_FORWARD(t)) {}
+    NullaryTreeBody( auto&& t ) : op(AUX_FORWARD(t)) {}
+    NullaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 struct UnaryTreeBody : public TreeNodeBody {
     UnaryTreeBody() = default;
     UnaryTreeBody( auto&& name, auto&& variable ) :
-        TreeNodeBody(AUX_FORWARD(name)),
+        op(AUX_FORWARD(name)),
         variable(AUX_FORWARD(variable))
     {}
     std::unique_ptr<OperatorBody> variable;
+    NullaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 struct BinaryTreeBody : public TreeNodeBody {
     BinaryTreeBody() = default;
     BinaryTreeBody( auto&& n, auto&& l, auto&& r ) :
-        TreeNodeBody(AUX_FORWARD(n)),
+        op(AUX_FORWARD(n)),
         left(AUX_FORWARD(l)),
         right(AUX_FORWARD(r))
     {}
     std::unique_ptr<OperatorBody> left, right;
+    NullaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 

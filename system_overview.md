@@ -8,8 +8,8 @@ This documents explains how the lexical and syntatical analysis is done,
 and what is intended for the semantical analysis (that is still not
 fully implemented).
 
-Other information about the system can be found at concepts.md,
-naming\_conventions.txt and mangling.md.
+Other information about the system can be found at concepts.md
+and naming\_conventions.txt.
 
 
 

@@ -1,9 +1,8 @@
 /* operator.h
  * Structure that holds the information about operators in the program.
  *
- * There are four operator types - nullary, prefix, postfix and binary -,
- * differentiated by name mangling (see mangling.txt). Each operator
- * can have several possible overloads. Each overload have a variable
+ * There are four operator types (nullary, prefix, postfix and binary). Each
+ * operator can have several possible overloads. Each overload have a variable
  * tree (that is used to resolve overload at runtime) and a corresponding
  * body - an tree structure, produced by the "semantic-syntatic" analyzer.
  */
@@ -30,7 +29,8 @@
  * the derived class UnaryOverload.
  *
  * Note that there is no need of differentiating beetween prefix
- * and postfix; all is done via mangling. */
+ * and postfix: each node has a pointer to its version of the operator.
+ */
 struct OperatorOverload : public Printable {
     std::unique_ptr<OperatorBody> body;
     /* Class invariant: the only instances in the tree below
