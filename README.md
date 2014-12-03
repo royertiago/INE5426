@@ -2,7 +2,7 @@ INE5426 - Compiler Construction
 ===============================
 
 This is the project developed at the INE5426 (Compller Construction)
-diciscipline; it is a compiler to a language invented by us.
+diciscipline; it is an interpreter to a language invented by us.
 
 To see an overview of the language, see sample.txt; for an overview of
 the program structure, see system\_overview.txt.
