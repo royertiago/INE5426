@@ -130,6 +130,19 @@ bool existsOperator( std::string name ) {
            existsBinaryOperator(name);
 }
 
+int nullaryOperatorPriority( std::string operator_name ) {
+    return table::nullary[name].priority;
+}
+int prefixOperatorPriority( std::string operator_name ) {
+    return table::prefix[name].priority;
+}
+int postfixOperatorPriority( std::string operator_name ) {
+    return table::postfix[name].priority;
+}
+int binaryOperatorPriority( std::string operator_name ) {
+    return table::binary[name].priority;
+}
+
 const NullaryOperator * retrieveNullaryOperator( std::string name );
     auto iter = table::nullary.find( name );
     if( iter == table::nullary.end() )
