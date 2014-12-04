@@ -111,4 +111,29 @@ void insertOverload( std::string name, int type,
     }
 }
 
+const NullaryOperator * retrieveNullaryOperator( std::string name );
+    auto iter = table::nullary.find( name );
+    if( iter == table::nullary.end() )
+        return nullptr;
+    return iter->second.get();
+}
+const UnaryOperator * retrievePrefixOperator( std::string name ) {
+    auto iter = table::prefix.find( name );
+    if( iter == table::prefix.end() )
+        return nullptr;
+    return iter->second.get();
+}
+const UnaryOperator * retrievePostfixOperator( std::string name ) {
+    auto iter = table::postfix.find( name );
+    if( iter == table::postfix.end() )
+        return nullptr;
+    return iter->second.get();
+}
+const BinaryOperator * retrieveBinaryOperator( std::string name ) {
+    auto iter = table::binary.find( name );
+    if( iter == table::binary.end() )
+        return nullptr;
+    return iter->second.get();
+}
+
 } // namespace global symbol table
