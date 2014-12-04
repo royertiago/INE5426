@@ -15,6 +15,18 @@ namespace tables {
     std::map<std::string, std::unique_ptr<BinaryOperator>> binary;
 }
 
+void insertCategory( std::string name ) {
+    tables::category.emplace( name, Category::next(name) );
+}
+
+bool existsCategory( std::string name ) {
+    return tables::category.count(key) != 0;
+}
+
+unsigned categoryValue( std::string name ) {
+    return tables::category[key]->value;
+}
+
 void insertOverload( std::string name, int type,
         int priority, std::unique_pter<OperatorOverload>&& overload )
 {
