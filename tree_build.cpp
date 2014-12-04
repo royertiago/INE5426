@@ -83,7 +83,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                         GlobalSymbolTable::instance.retrieveNullaryOperator(tbody.token.lexeme)
                     );
                 dp[i][i].valid = true;
-                dp[i][i].priority = GlobalSymbolTable::instance.operatorPriority(
+                dp[i][i].priority = GlobalSymbolTable::instance.nullaryOperatorPriority(
                         tbody.token.lexeme
                     );
             }
@@ -116,7 +116,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                             GlobalSymbolTable::instance.retrievePrefixOperator(name),
                             dp[i+1][j].data->clone()
                         );
-                    dp[i][j].priority = GlobalSymbolTable::instance.operatorPriority(name);
+                    dp[i][j].priority = GlobalSymbolTable::instance.prefixOperatorPriority(name);
                     dp[i][j].state = Data::VALID;
                 }
             }
@@ -134,7 +134,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                             GlobalSymbolTable::instance.retrievePrefixOperator(name),
                             dp[i][j-1].data->clone()
                         );
-                    dp[i][j].priority = GlobalSymbolTable::instance.operatorPriority(name);
+                    dp[i][j].priority = GlobalSymbolTable::instance.postfixOperatorPriority(name);
                     dp[i][j].state = Data::VALID;
                 }
             }
@@ -159,7 +159,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                             dp[k+1][j].data->clone();
                         );
                         dp[i][j].valid = true;
-                        dp[i][j].priority = GlobalSymbolTable::instance.operatorPriority(name);
+                        dp[i][j].priority = GlobalSymbolTable::instance.binaryOperatorPriority(name);
                     }
                 }
 

@@ -48,7 +48,12 @@ public:
     int maximumLeftPriority( std::string operator_name ) const;
     int maximumRightPriority( std::string operator_name ) const;
 
-    int operatorPriority( std::string operator_name ) const;
+    /* Retrieves the priority of the operator.
+     * assumes existsOperator*. */
+    int nullaryOperatorPriority( std::string operator_name );
+    int prefixOperatorPriority( std::string operator_name );
+    int postfixOperatorPriority( std::string operator_name );
+    int binaryOperatorPriority( std::string operator_name );
 
     /* Returns pointers to the requested operators,
      * or nullptr if no such operator exists in this file. */
