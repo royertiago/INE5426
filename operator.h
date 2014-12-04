@@ -58,13 +58,19 @@ struct BinaryOverload : public OperatorOverload {
 };
 
 template <typename Overload>
-struct Operator : public Symbol {
+struct OperatorBase : public Symbol {
     std::vector<Overload> overloads;
     unsigned priority;
 };
 
-typedef Operator<NullaryOverload> NullaryOperator;
-typedef Operator<UnaryOverload> UnaryOperator;
-typedef Operator<BinaryOverload> BinaryOperator;
+struct NullaryOperator : public OperatorBase<NullaryOverload> {
+};
+struct UnaryOperator : public OperatorBase<NullaryOverload> {
+    unsigned operand_priority;
+};
+struct BinaryOperator : public OperatorBase<NullaryOverload> {
+    unsigned left_priority;
+    unsigned right_priority;
+};
 
 #endif // OPERATOR_H
