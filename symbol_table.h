@@ -49,6 +49,13 @@ public:
     int maximumRightPriority( std::string operator_name ) const;
 
     int operatorPriority( std::string operator_name ) const;
+
+    /* Returns pointers to the requested operators,
+     * or nullptr if no such operator exists in this file. */
+    const NullaryOperator * retrieveNullaryOperator( std::string name ) const;
+    const UnaryOperator * retrievePrefixOperator( std::string name ) const;
+    const UnaryOperator * retrievePostfixOperator( std::string name ) const;
+    const BinaryOperator * retrieveBinaryOperator( std::string name ) const;
 };
 
 /* Local symbol table used to store the operator variables. */
