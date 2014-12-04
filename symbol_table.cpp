@@ -130,6 +130,19 @@ bool existsOperator( std::string name ) {
            existsBinaryOperator(name);
 }
 
+int maximumPrefixPriority( std::string operator_name ) {
+    return table::prefix[name].operand_priority;
+}
+int maximumPostfixPriority( std::string operator_name ) {
+    return table::postfix[name].operand_priority;
+}
+int maximumLeftPriority( std::string operator_name ) {
+    return table::binary[name].left;
+}
+int maximumRightPriority( std::string operator_name ) {
+    return table::binary[name].right;
+}
+
 int nullaryOperatorPriority( std::string operator_name ) {
     return table::nullary[name].priority;
 }
