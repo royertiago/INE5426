@@ -153,29 +153,29 @@ struct TreeNodeBody : public OperatorBody {
 
 struct NullaryTreeBody : public TreeNodeBody {
     NullaryTreeBody() = default;
-    NullaryTreeBody( auto&& t ) : op(AUX_FORWARD(t)) {}
-    NullaryOperator * op;
+    NullaryTreeBody( auto&& op ) : op(AUX_FORWARD(op)) {}
+    const NullaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 struct UnaryTreeBody : public TreeNodeBody {
     UnaryTreeBody() = default;
-    UnaryTreeBody( auto&& name, auto&& variable ) :
+    UnaryTreeBody( auto&& op, auto&& variable ) :
         op(AUX_FORWARD(name)),
         variable(AUX_FORWARD(variable))
     {}
     std::unique_ptr<OperatorBody> variable;
-    NullaryOperator * op;
+    const UnaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 struct BinaryTreeBody : public TreeNodeBody {
     BinaryTreeBody() = default;
-    BinaryTreeBody( auto&& n, auto&& l, auto&& r ) :
-        op(AUX_FORWARD(n)),
+    BinaryTreeBody( auto&& op, auto&& l, auto&& r ) :
+        op(AUX_FORWARD(op)),
         left(AUX_FORWARD(l)),
         right(AUX_FORWARD(r))
     {}
     std::unique_ptr<OperatorBody> left, right;
-    NullaryOperator * op;
+    const BinaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
