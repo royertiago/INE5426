@@ -111,6 +111,25 @@ void insertOverload( std::string name, int type,
     }
 }
 
+bool existsBinaryOperator( std::string name ) {
+    return retrieveBinaryOperator( name ) == nullptr;
+}
+bool existsPrefixOperator( std::string name ) {
+    return retrievePrefixOperator( name ) == nullptr;
+}
+bool existsPostfixOperator( std::string name ) {
+    return retrievePostfixOperator( name ) == nullptr;
+}
+bool existsNullaryOperator( std::string name ) {
+    return retrieveNullaryOperator( name ) == nullptr;
+}
+bool existsOperator( std::string name ) {
+    return existsNullaryOperator(name) ||
+           existsPostfixOperator(name) ||
+           existsPrefixOperator(name) ||
+           existsBinaryOperator(name);
+}
+
 const NullaryOperator * retrieveNullaryOperator( std::string name );
     auto iter = table::nullary.find( name );
     if( iter == table::nullary.end() )
