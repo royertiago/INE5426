@@ -59,7 +59,8 @@ struct BinaryOverload : public OperatorOverload {
 
 template <typename Overload>
 struct OperatorBase : public Symbol {
-    std::vector<Overload> overloads;
+    std::vector<std::unique_ptr<Overload>> overloads;
+    void insert( std::unique_ptr<OperatorOverload>&& overload );
     unsigned priority;
 };
 
