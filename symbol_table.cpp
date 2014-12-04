@@ -182,3 +182,12 @@ const BinaryOperator * retrieveBinaryOperator( std::string name ) {
 }
 
 } // namespace global symbol table
+
+// Implementation of LocalSymbolTable methods.
+void LocalSymbolTable::insert( std::string name ) {
+    table.insert( name );
+}
+
+bool LocalSymbolTable::contains( std::string name ) const {
+    return table.count( name ) != 0;
+}
