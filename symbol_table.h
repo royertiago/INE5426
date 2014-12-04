@@ -6,8 +6,6 @@
 
 #include <set>
 #include <string>
-#include <unordered_map>
-#include <vector>
 #include "symbol.h"
 #include "operator.h"
 
@@ -15,38 +13,30 @@
  * The symbol table stores and retrieves the symbols defined in the program;
  * namely, categories and operators.
  */
-class GlobalSymbolTable {
-    std::unordered_map<std::string, Symbol> table;
-
-    GlobalSymbolTable() = default;
-public:
-    /* The only instance of the global symbol table. */
-    static GlobalSymbolTable instance;
-
-
+namespace GlobalSymbolTable {
     void insertCategory( std::string name );
-    bool existsCategory( std::string name ) const;
-    int categoryValue( std::string name ) const;
+    bool existsCategory( std::string name );
+    unsigned categoryValue( std::string name ); // assumes existsCategory
 
     /* Throws an exception if either
      *  - type is F and there is a category with same name, or
      *  - such an operator already exists with different priority. */
     void insertOverload( std::string name, int type, int priority,
-            OperatorOverload overload );
+            std::unique_ptr<OperatorOverload> overload );
 
-    bool existsBinaryOperator( std::string name ) const;
-    bool existsPrefixOperator( std::string name ) const;
-    bool existsPostfixOperator( std::string name ) const;
-    bool existsNullaryOperator( std::string name ) const;
-    bool existsOperator( std::string name ) const;
+    bool existsBinaryOperator( std::string name );
+    bool existsPrefixOperator( std::string name );
+    bool existsPostfixOperator( std::string name );
+    bool existsNullaryOperator( std::string name );
+    bool existsOperator( std::string name );
 
     /* Returns the minimum priority a prefix/postfix/left/right
      * operand can have. This function takes account for the grouping
      * of operators, defined by it's types. */
-    int maximumPrefixPriority( std::string operator_name ) const;
-    int maximumPostfixPriority( std::string operator_name ) const;
-    int maximumLeftPriority( std::string operator_name ) const;
-    int maximumRightPriority( std::string operator_name ) const;
+    int maximumPrefixPriority( std::string operator_name );
+    int maximumPostfixPriority( std::string operator_name );
+    int maximumLeftPriority( std::string operator_name );
+    int maximumRightPriority( std::string operator_name );
 
     /* Retrieves the priority of the operator.
      * assumes existsOperator*. */
@@ -57,10 +47,10 @@ public:
 
     /* Returns pointers to the requested operators,
      * or nullptr if no such operator exists in this file. */
-    const NullaryOperator * retrieveNullaryOperator( std::string name ) const;
-    const UnaryOperator * retrievePrefixOperator( std::string name ) const;
-    const UnaryOperator * retrievePostfixOperator( std::string name ) const;
-    const BinaryOperator * retrieveBinaryOperator( std::string name ) const;
+    const NullaryOperator * retrieveNullaryOperator( std::string name );
+    const UnaryOperator * retrievePrefixOperator( std::string name );
+    const UnaryOperator * retrievePostfixOperator( std::string name );
+    const BinaryOperator * retrieveBinaryOperator( std::string name );
 };
 
 /* Local symbol table used to store the operator variables. */

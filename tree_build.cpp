@@ -78,14 +78,12 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
     for( int i = 0; i < body.sequence.size(); ++i )
         try {
             const TerminalBody & tbody = dynamic_cast<TerminalBody&>(*body.sequence[i]);
-            if( GlobalSymbolTable::instance.existsNullaryOperator(tbody.token.lexeme) ) {
+            if( GlobalSymbolTable::existsNullaryOperator(tbody.token.lexeme) ) {
                 dp[i][i].date = std::make_unique<NullaryTreeBody>(
-                        GlobalSymbolTable::instance.retrieveNullaryOperator(tbody.token.lexeme)
+                        GlobalSymbolTable::retrieveNullaryOperator(tbody.token.lexeme)
                     );
                 dp[i][i].valid = true;
-                dp[i][i].priority = GlobalSymbolTable::instance.nullaryOperatorPriority(
-                        tbody.token.lexeme
-                    );
+                dp[i][i].priority = GlobalSymbolTable::nullaryOperatorPriority(tbody.token.lexeme);
             }
         } catch( std::bad_cast & ex ) {
             try{
@@ -111,12 +109,12 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                 TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[i].get()))
             {
                 std::string name = tbody->token.lexeme;
-                if( dp[i+1][j].priority < GlobalSymbolTable::instance.maximumPrefixPriority(name) ) {
+                if( dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) ) {
                     dp[i][j].data = std::make_unique<UnaryTreeBody>(
-                            GlobalSymbolTable::instance.retrievePrefixOperator(name),
+                            GlobalSymbolTable::retrievePrefixOperator(name),
                             dp[i+1][j].data->clone()
                         );
-                    dp[i][j].priority = GlobalSymbolTable::instance.prefixOperatorPriority(name);
+                    dp[i][j].priority = GlobalSymbolTable::prefixOperatorPriority(name);
                     dp[i][j].state = Data::VALID;
                 }
             }
@@ -125,16 +123,16 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                 TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
             {
                 std::string name = tbody->token.lexeme;
-                if( dp[i][j-1].priority < GlobalSymbolTable::instance.maximumPrefixPriority(name) ) {
+                if( dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) ) {
                     if( dp[i][j].valid ) {
                         dp[i][j].valid = false;
                         continue;
                     }
                     dp[i][j].data = std::make_unique<UnaryTreeBody>(
-                            GlobalSymbolTable::instance.retrievePrefixOperator(name),
+                            GlobalSymbolTable::retrievePostfixOperator(name),
                             dp[i][j-1].data->clone()
                         );
-                    dp[i][j].priority = GlobalSymbolTable::instance.postfixOperatorPriority(name);
+                    dp[i][j].priority = GlobalSymbolTable::postfixOperatorPriority(name);
                     dp[i][j].state = Data::VALID;
                 }
             }
@@ -146,20 +144,20 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                     TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
                 {
                     std::string name = tbody->name;
-                    if( dp[i][k-1].priority < GlobalSymbolTable::instance.maximumLeftPriority(name)
-                     && dp[k+1][j].priority < GlobalSymbolTable::instance.maximumRightPriority(name))
+                    if( dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
+                     && dp[k+1][j].priority < GlobalSymbolTable::maximumRightPriority(name))
                     {
                         if( dp[i][j].valid ) {
                             dp[i][j].valid = false;
                             goto end_external_loop;
                         }
                         dp[i][j].data = std::make_unique<BinaryOperator>(
-                            GlobalSymbolTable::instance.retrieveBinaryOperator(name),
+                            GlobalSymbolTable::retrieveBinaryOperator(name),
                             dp[i][k-1].data->clone();
                             dp[k+1][j].data->clone();
                         );
                         dp[i][j].valid = true;
-                        dp[i][j].priority = GlobalSymbolTable::instance.binaryOperatorPriority(name);
+                        dp[i][j].priority = GlobalSymbolTable::binaryOperatorPriority(name);
                     }
                 }
 
