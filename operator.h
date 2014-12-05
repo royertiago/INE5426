@@ -40,21 +40,25 @@ struct OperatorOverload : public Printable {
      * with suitable instances of VariableBody and NumericBody,
      * and of TreeNodeBody, respectively. */
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual OperatorOverload * clone() const override;
 };
 
 struct NullaryOverload : public OperatorOverload {
     // There is no signature.
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual NullaryOverload * clone() const override;
 };
 
 struct UnaryOverload : public OperatorOverload {
     std::unique_ptr<OperatorVariable> variable;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual UnaryOverload * clone() const override;
 };
 struct BinaryOverload : public OperatorOverload {
     std::unique_ptr<OperatorVariable> left;
     std::unique_ptr<OperatorVariable> right;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual BinaryOverload * clone() const override;
 };
 
 template <typename Overload>

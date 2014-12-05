@@ -26,6 +26,7 @@ struct OperatorName : public SignatureToken {
     OperatorName( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual OperatorName * clone() const override;
 };
 
 /* OperatorVariable is the structure seen in the operator
@@ -59,6 +60,7 @@ struct NamedVariable : public OperatorVariable {
     NamedVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual NamedVariable * clone() const override;
 };
 
 struct RestrictedVariable : public OperatorVariable {
@@ -66,6 +68,7 @@ struct RestrictedVariable : public OperatorVariable {
     RestrictedVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual RestrictedVariable * clone() const override;
 };
 
 struct NumberVariable : public OperatorVariable {
@@ -73,6 +76,7 @@ struct NumberVariable : public OperatorVariable {
     NumberVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual NumberVariable * clone() const override;
 };
 
 struct PairVariable : public OperatorVariable {
@@ -84,6 +88,7 @@ struct PairVariable : public OperatorVariable {
     std::unique_ptr<OperatorVariable> first;
     std::unique_ptr<OperatorVariable> second;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual PairVariable * clone() const override;
 };
 
 /* Operator bodies.
@@ -111,11 +116,13 @@ struct PairBody : public OperatorBody {
     std::unique_ptr<OperatorBody> first;
     std::unique_ptr<OperatorBody> second;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual PairBody * clone() const override;
 };
 
 struct SequenceBody : public OperatorBody {
     std::vector< std::unique_ptr<OperatorBody> > sequence;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual SequenceBody * clone() const override;
 };
 
 struct TerminalBody : public OperatorBody {
@@ -123,6 +130,7 @@ struct TerminalBody : public OperatorBody {
     TerminalBody( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual TerminalBody * clone() const override;
 };
 
 /* These two structures are generated from TerminalBody
@@ -132,6 +140,7 @@ struct VariableBody : public OperatorBody {
     VariableBody( auto&& t ) : name(AUX_FORWARD(t)) {}
     std::string name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual VariableBody * clone() const override;
 };
 
 struct NumericBody : public OperatorBody {
@@ -139,6 +148,7 @@ struct NumericBody : public OperatorBody {
     NumericBody( auto&& t ) : value(AUX_FORWARD(t)) {}
     int value;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual NumericBody * clone() const override;
 };
 
 /* These structures are computed by the semantic analyzer.
@@ -157,6 +167,7 @@ struct NullaryTreeBody : public TreeNodeBody {
     NullaryTreeBody( auto&& op ) : op(AUX_FORWARD(op)) {}
     const NullaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual NullaryTreeBody * clone() const override;
 };
 struct UnaryTreeBody : public TreeNodeBody {
     UnaryTreeBody() = default;
@@ -167,6 +178,7 @@ struct UnaryTreeBody : public TreeNodeBody {
     std::unique_ptr<OperatorBody> variable;
     const UnaryOperator * op;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual UnaryTreeBody * clone() const override;
 };
 struct BinaryTreeBody : public TreeNodeBody {
     BinaryTreeBody() = default;
@@ -178,6 +190,7 @@ struct BinaryTreeBody : public TreeNodeBody {
     const BinaryOperator * op;
     std::unique_ptr<OperatorBody> left, right;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual BinaryTreeBody * clone() const override;
 };
 
 /* A statement is the basic structure of the program.
@@ -190,11 +203,13 @@ struct Statement : public Printable {
 struct IncludeCommand : public Statement {
     Token filename;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual IncludeCommand * clone() const override;
 };
 
 struct CategoryDefinition : public Statement {
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual CategoryDefinition * clone() const override;
 };
 
 struct OperatorDefinition : public Statement {
@@ -203,6 +218,7 @@ struct OperatorDefinition : public Statement {
     std::vector< std::unique_ptr<SignatureToken> > names;
     std::unique_ptr<OperatorBody> body;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual OperatorDefinition * clone() const override;
 };
 
 #undef AUX_FORWARD

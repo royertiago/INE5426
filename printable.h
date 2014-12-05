@@ -10,6 +10,7 @@
 struct Printable {
     virtual ~Printable() = default;
     virtual std::ostream& print_to( std::ostream& ) const = 0;
+    virtual Printable * clone() const = 0;
 };
 
 inline std::ostream& operator<<( std::ostream& os, const Printable& obj ) {
