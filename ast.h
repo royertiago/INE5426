@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "operator_fwd.h"
 #include "printable.h"
 #include "token.h"
 
@@ -160,7 +161,7 @@ struct NullaryTreeBody : public TreeNodeBody {
 struct UnaryTreeBody : public TreeNodeBody {
     UnaryTreeBody() = default;
     UnaryTreeBody( auto&& op, auto&& variable ) :
-        op(AUX_FORWARD(name)),
+        op(AUX_FORWARD(op)),
         variable(AUX_FORWARD(variable))
     {}
     std::unique_ptr<OperatorBody> variable;
@@ -174,8 +175,8 @@ struct BinaryTreeBody : public TreeNodeBody {
         left(AUX_FORWARD(l)),
         right(AUX_FORWARD(r))
     {}
-    std::unique_ptr<OperatorBody> left, right;
     const BinaryOperator * op;
+    std::unique_ptr<OperatorBody> left, right;
     virtual std::ostream& print_to( std::ostream& ) const override;
 };
 
