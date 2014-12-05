@@ -26,4 +26,13 @@ struct parse_error : public std::runtime_error {
         where( where )
     {}
 };
+
+struct semantic_error : public std::runtime_error {
+    semantic_error( const char * what ) :
+        runtime_error( what )
+    {}
+    semantic_error( std::string & what ) :
+        runtime_error( what )
+    {}
+};
 #endif // EXCEPTIONS_H

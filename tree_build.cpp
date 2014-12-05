@@ -181,7 +181,7 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
     if( table.contains( body.name.lexeme ) )
         return std::make_unique<VariableBody>( body.name.lexeme );
 
-    throw semantic_error( "Terminal is not a number neiter a variable", body.name );
+    throw semantic_error( "Terminal " + body.name + "is not a number neiter a variable" );
     // TODO: maybe this behavior is unwanted according to buildExpressionSequenceBody.
 }
 
