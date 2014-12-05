@@ -2,6 +2,7 @@
  * Implementation of symbol_table.h
  */
 #include <unordered_map>
+#include "exceptions.h"
 #include "symbol_table.h"
 
 namespace GlobalSymbolTable {

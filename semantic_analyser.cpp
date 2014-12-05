@@ -1,7 +1,10 @@
 /* semantic_analyser.cpp
  * Implementation of semantic_analyser.h
  */
+#include "tree_build.h"
+#include "operator.h"
 #include "semantic_analyser.h"
+#include "symbol_table.h"
 
 void SemanticAnalyser::set_parser( std::unique_ptr<Paser>&& parser ) {
     _current_parser = std::move(parser);

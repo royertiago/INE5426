@@ -5,6 +5,7 @@
 #define EXCEPTIONS_H
 
 #include <stdexcept>
+#include "token.h"
 
 struct file_error : public std::runtime_error {
     file_error( const char * what ) :

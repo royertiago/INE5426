@@ -4,7 +4,9 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <typeindex>
+#include "exceptions.h"
 #include "tree_build.h"
+#include "symbol_table.h"
 
 namespace {
     /* Builds the expression tree of the given operator body, changing every
