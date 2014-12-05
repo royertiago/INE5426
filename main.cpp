@@ -26,29 +26,35 @@ void syntactic_analysis( const char * filename ) {
 }
 
 int main( int argc, char * argv[] ) {
-    char * filename;
-    bool lexical = false;
-
-    if( argc == 2 )
-        filename = argv[1];
-    else if( argc == 3 ) {
-        filename = argv[2];
-        if( strcmp(argv[1], "-l" ) == 0 )
-            lexical = true;
-        else {
-            std::cerr << "Unknown option " << argv[1] << '\n';
-            return 1;
+    if( argc == 2 ) {
+        if( strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0 ) {
+            std::cout << "Usage: " << argv[0] << " [-l | -p] <filename>\n"
+                         "\n"
+                         "This program will analyse the program specified in the last argument.\n"
+                         "  -l, --lexer     Do lexical analysis on the program.\n"
+                         "  -p, --parser    Do syntactic analysis on the program. This is the default.\n"
+                         "  -h, --help      Display this help and quit.\n";
+            return 0;
         }
-    }
-    else {
-        std::cerr << "Usage: " << argv[0] << " [-l] <filename>\n";
-        return 1;
+        syntactic_analysis( argv[1] );
+        return 0;
     }
 
-    if( lexical )
+    if( argc != 3 ) {
+        std::cerr << "Usage: " << argv[0] << " [-l | -p] <filename>\n";
+    }
+
+    const char * filename = argv[2];
+    if( strcmp(argv[1], "-l" ) == 0 || strcmp(argv[1], "--lexer") == 0 ) {
         lexical_analysis( filename );
-    else
-        syntactic_analysis( filename );
-    return 0;
+        return 0;
+    }
+    if( strcmp(argv[1], "-p" ) == 0 || strcmp(argv[1], "--parser") == 0 ) {
+        syntactical_analysis( filename );
+        return 0;
+    }
+
+    std::cerr << "Unknown option " << argv[1] << '\n';
+    return 1;
 }
 
