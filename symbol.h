@@ -11,11 +11,16 @@
 #include <string>
 
 struct Symbol {
+    Symbol( std::string name ) : name( name ) {}
     virtual ~Symbol() = default;
     std::string name;
 };
 
 struct Category : public Symbol {
+    Category( std::string name, unsigned value ) :
+        Symbol( name ),
+        value( value )
+    {}
     unsigned value;
 
     /* Constructs a new category pointer.
