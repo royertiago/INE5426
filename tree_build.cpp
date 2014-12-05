@@ -43,7 +43,7 @@ std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def )
 
 namespace {
 typedef std::unique_ptr<OperatorBody> (*ExpressionTreeBuilder)(
-        const OperatorBody&*,
+        const OperatorBody&,
         const LocalSymbolTable&
     );
 

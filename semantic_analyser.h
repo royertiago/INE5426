@@ -28,7 +28,7 @@ struct SemanticAnalyser {
     bool has_next() const;
 
 private:
-    std::unique_ptr<Parser>&& _current_parser
+    std::unique_ptr<Parser> _current_parser;
     std::unique_ptr<Statement> _next;
     void compute_next();
 };

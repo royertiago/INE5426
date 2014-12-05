@@ -59,7 +59,7 @@ int main( int argc, char * argv[] ) {
 
     if( argc != 3 ) {
         std::cout << "Usage: " << argv[0] << " [-l | -p | -s] <filename>\n";
-        return 1
+        return 1;
     }
 
     const char * filename = argv[2];
@@ -68,11 +68,11 @@ int main( int argc, char * argv[] ) {
         return 0;
     }
     if( strcmp(argv[1], "-p" ) == 0 || strcmp(argv[1], "--parser") == 0 ) {
-        syntactical_analysis( filename );
+        syntactic_analysis( filename );
         return 0;
     }
     if( strcmp(argv[1], "-s" ) == 0 || strcmp(argv[1], "--semantic") == 0 ) {
-        semantical_analysis( filename );
+        semantic_analysis( filename );
         return 0;
     }
 

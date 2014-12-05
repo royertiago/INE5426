@@ -6,7 +6,7 @@
 #include "semantic_analyser.h"
 #include "symbol_table.h"
 
-void SemanticAnalyser::set_parser( std::unique_ptr<Paser>&& parser ) {
+void SemanticAnalyser::set_parser( std::unique_ptr<Parser>&& parser ) {
     _current_parser = std::move(parser);
 }
 
@@ -22,8 +22,8 @@ const Statement * SemanticAnalyser::peek() {
     return _next.get();
 }
 
-bool Parser::has_next() const {
-    return _current_parser && _current_parser.has_next();
+bool SemanticAnalyser::has_next() const {
+    return _current_parser && _current_parser->has_next();
 }
 
 void SemanticAnalyser::compute_next() {
@@ -47,7 +47,7 @@ void SemanticAnalyser::compute_next() {
 
         GlobalSymbolTable::insertOverload( _next->name, def.format, def.priority, _next.clone() );
     }
-    catch ( lexical_error & err ) {
+    catch ( parse_error & err ) {
         _current_parser->panic();
         throw;
     }
