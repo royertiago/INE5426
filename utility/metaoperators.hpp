@@ -31,7 +31,7 @@ namespace mp {
     /* These two functions together take a template class to a set of functors,
      * tho objetcs and a list of pointer to members. The members of the objecs
      * are tested for equality sequencially; when the first non equal member
-     * is found, the function returns the value of applying 
+     * is found, the function returns the value of applying
      * Function<Type>()( member1, member2 ). If all the members (but the last)
      * are equal, the function returs the result of applying the function to
      * the last member, no matter wheter they are equal or not.
@@ -43,7 +43,7 @@ namespace mp {
               typename Member,
               typename ... Members
             >
-    bool recursively_compare( const T& rhs, const T& lhs, 
+    bool recursively_compare( const T& rhs, const T& lhs,
             Member T::* member, Members T::* ... members );
 
     template< template <typename MemType> class Function,
@@ -89,7 +89,7 @@ namespace mp {
               typename Member,
               typename ... Members
             >
-    bool recursively_compare( const T& rhs, const T& lhs, 
+    bool recursively_compare( const T& rhs, const T& lhs,
             Member T::* member, Members T::* ... members )
     {
         if( rhs.*member == lhs.*member )
