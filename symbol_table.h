@@ -60,5 +60,9 @@ class LocalSymbolTable {
 public:
     void insert( std::string symbol );
     bool contains( std::string symbol ) const;
+
+    /* Joins two local symbol tables.
+     * Returns *this. */
+    LocalSymbolTable& merge( const LocalSymbolTable & );
 };
 #endif // SYMBOL_TABLE_H
