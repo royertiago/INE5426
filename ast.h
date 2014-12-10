@@ -179,8 +179,8 @@ struct UnaryTreeBody : public TreeNodeBody {
         op(AUX_FORWARD(op)),
         variable(AUX_FORWARD(variable))
     {}
-    std::unique_ptr<OperatorBody> variable;
     const UnaryOperator * op;
+    std::unique_ptr<OperatorBody> variable;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual UnaryTreeBody * clone() const override;
 };
