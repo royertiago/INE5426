@@ -19,6 +19,7 @@
  * Q and P are OperatorVariables and ** is an OperatorName. */
 struct SignatureToken : public Printable {
     virtual ~SignatureToken() = default;
+    virtual SignatureToken * clone() const override = 0;
 };
 
 struct OperatorName : public SignatureToken {
@@ -53,6 +54,7 @@ struct OperatorName : public SignatureToken {
  */
 struct OperatorVariable : public SignatureToken {
     virtual ~OperatorVariable() = default;
+    virtual OperatorVariable * clone() const override = 0;
 };
 
 struct NamedVariable : public OperatorVariable {
@@ -105,6 +107,7 @@ struct PairVariable : public OperatorVariable {
  * TreeNodeBody (a reference to an operator and its arguments). */
 struct OperatorBody : public Printable {
     virtual ~OperatorBody() = default;
+    virtual OperatorBody * clone() const override = 0;
 };
 
 struct PairBody : public OperatorBody {
@@ -160,6 +163,7 @@ struct TreeNodeBody : public OperatorBody {
      * Since each pointer points to a different object type,
      * it is better to mantain the pointer in each derived class
      * rendering this class empty. */
+    virtual TreeNodeBody * clone() const override = 0;
 };
 
 struct NullaryTreeBody : public TreeNodeBody {
@@ -198,6 +202,7 @@ struct BinaryTreeBody : public TreeNodeBody {
  * and OperatorDefinition. */
 struct Statement : public Printable {
     virtual ~Statement() = default;
+    virtual Statement * clone() const override = 0;
 };
 
 struct IncludeCommand : public Statement {
