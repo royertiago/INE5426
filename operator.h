@@ -31,7 +31,7 @@
  * Note that there is no need of differentiating beetween prefix
  * and postfix: each node has a pointer to its version of the operator.
  */
-struct OperatorOverload : public Printable {
+struct OperatorOverload : public Statement {
     std::unique_ptr<OperatorBody> body;
     /* Class invariant: the only instances in the tree below
      * 'body' are TreeNodeBody, NumericBody, VariableBody
