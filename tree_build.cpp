@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <typeindex>
+#include <unordered_map>
 #include "exceptions.h"
 #include "tree_build.h"
 #include "symbol_table.h"
@@ -13,6 +14,9 @@ namespace {
      * SequenceBody and TerminalBody to suitable instances of VariableBody,
      * NumericBody and TreeNodeBody. */
     std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody&, const LocalSymbolTable& );
+
+    /* Aggregates all the variables' names used inside the passed OperatorVariable. */
+    LocalSymbolTable collectVariables( const OperatorVariable & );
 
 } // anonymous namespace
 
@@ -24,10 +28,15 @@ std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& def
 
 std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<UnaryOverload>();
-    if( def.format[0] == 'f' ) // we need def.names[1]->clone
-        ptr->variable = std::make_unique<OperatorVariable>( *def.names[1] );
-    else
-        ptr->variable = std::make_unique<OperatorVariable>( *def.names[0] );
+    LocalSymbolTable table;
+    if( def.format[0] == 'f' ) {
+        ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[1]).clone());
+        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[0]) );
+    }
+    else {
+        ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[0]).clone());
+        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[1]) );
+    }
 
     ptr->body = std::move( buildExpressionTree(*def.body) );
     return std::move( ptr );
@@ -37,6 +46,7 @@ std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def )
     auto ptr = std::make_unique<BinaryOverload>();
     ptr->left = std::make_unique<OperatorVariable>( *def.names[0] );
     ptr->right = std::make_unique<OperatorVariable>( *def.names[2] );
+    auto table = collectVariables( *ptr->left ).merge(collectVariables( *ptr->right ));
     ptr->body = std::move( buildExpressionTree(*def.body) );
     return std::move( ptr );
 }
@@ -208,6 +218,54 @@ std::unique_ptr<OperatorBody> buildExpressionTree(
         AUX_TYPE(TerminalBody),
     };
     return std::move( functions.at(type_index(typeid(body)))(body, table) );
+}
+
+typedef void(* InsertorFunction )( const OperatorVariable &, LocalSymbolTable & );
+
+void insertVariables( const OperatorVariable & var, LocalSymbolTable & table ) {
+    // A 'switch-case' with types
+    static std::unordered_map<std::type_index, InsertorFunction > jump_table =
+    {
+        {
+            std::type_index(typeid(NamedVariable)),
+            static_cast<InsertorFunction>(
+                []( const OperatorVariable & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const NamedVariable&>(var);
+                    table.insert( nvar.name.lexeme );
+                })
+        },
+        {
+            std::type_index(typeid(RestrictedVariable)),
+            static_cast<InsertorFunction>(
+                []( const OperatorVariable & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const RestrictedVariable&>(var);
+                    table.insert( nvar.name.lexeme );
+                })
+        },
+        {
+            std::type_index(typeid(NumericVariable)),
+            static_cast<InsertorFunction>(
+                []( const OperatorVariable &, LocalSymbolTable & ) {
+                    // We do not need to save numbers in the symbol table.
+                })
+        },
+        {
+            std::type_index(typeid(PairVariable)),
+            static_cast<InsertorFunction>(
+                []( const OperatorVariable & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const PairVariable&>(var);
+                    insertVariables( *nvar.first, table );
+                    insertVariables( *nvar.second, table );
+                })
+        },
+    };
+    jump_table.at(typeid(var))( var, table );
+}
+
+LocalSymbolTable collectVariables( const OperatorVariable & var ) {
+    LocalSymbolTable table;
+    insertVariables( var, table );
+    return table;
 }
 
 } // anonymous namespace
