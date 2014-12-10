@@ -76,10 +76,10 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
         bool valid = false;
         unsigned priority = 0;
     };
-    std::vector<std::vector<Data>> dp(
-            body.sequence.size(),
-            std::vector<Data>( body.sequence.size() )
-        );
+    std::vector<std::vector<Data>> dp;
+    for( unsigned i = 0; i < body.sequence.size(); i++ ) {
+        dp.emplace_back( std::vector<Data>( body.sequence.size() ) );
+    }
     /* dp[i][j] represents the parse tree for the subsequence
      * consisting of the 'tokens' body.sequence[i, i+1, ..., j].
      *
