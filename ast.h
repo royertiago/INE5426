@@ -49,7 +49,7 @@ struct OperatorName : public SignatureToken {
  *      1
  *
  * This code defines 0 ! as 1. These variables are represented
- * via class NumberVariable.
+ * via class NumericVariable.
  */
 struct OperatorVariable : public SignatureToken {
     virtual ~OperatorVariable() = default;
@@ -71,12 +71,12 @@ struct RestrictedVariable : public OperatorVariable {
     virtual RestrictedVariable * clone() const override;
 };
 
-struct NumberVariable : public OperatorVariable {
-    NumberVariable() = default;
-    NumberVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+struct NumericVariable : public OperatorVariable {
+    NumericVariable() = default;
+    NumericVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual NumberVariable * clone() const override;
+    virtual NumericVariable * clone() const override;
 };
 
 struct PairVariable : public OperatorVariable {

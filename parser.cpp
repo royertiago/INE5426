@@ -135,7 +135,7 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
 
 std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
     if( alex.peek().id == Token::NUM )
-        return std::make_unique<NumberVariable>(alex.next());
+        return std::make_unique<NumericVariable>(alex.next());
     if( alex.peek().id == Token::IDENTIFIER )
         return std::make_unique<NamedVariable>(alex.next());
     if( alex.peek().id == Token::STRING )
@@ -162,7 +162,7 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
             throw parse_error( "Number variables need not be further restricted", tok );
         }
         if( tok.id == Token::NUM )
-            lookahead = std::make_unique<NumberVariable>( tok );
+            lookahead = std::make_unique<NumericVariable>( tok );
         else if( tok.id == Token::IDENTIFIER )
             lookahead = std::make_unique<NamedVariable>( tok );
         else

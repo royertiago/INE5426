@@ -17,7 +17,7 @@ std::ostream& RestrictedVariable::print_to( std::ostream& os ) const {
     return os << "{{RestrictedVar} " << name << '}';
 }
 
-std::ostream& NumberVariable::print_to( std::ostream& os ) const {
+std::ostream& NumericVariable::print_to( std::ostream& os ) const {
     return os << "{{NumberVar} " << name << '}';
 }
 
