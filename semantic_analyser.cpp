@@ -45,7 +45,9 @@ void SemanticAnalyser::compute_next() {
         else
             _next = std::move( buildBinaryTree(def) );
 
-        GlobalSymbolTable::insertOverload( _next->name, def.format, def.priority, _next.clone() );
+        OperatorOverload & op = static_cast<OperatorOverload&>(*_next);
+        GlobalSymbolTable::insertOverload( op.name, def.format, def.priority,
+                std::move(std::unique_ptr<OperatorOverload>(op.clone())) );
     }
     catch ( parse_error & err ) {
         _current_parser->panic();
