@@ -87,7 +87,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
      * Although it is possible to parse around this limitations, the algorithm
      * is even more complex than the one presented here. */
 
-    for( int i = 0; i < body.sequence.size(); ++i )
+    for( unsigned i = 0; i < body.sequence.size(); ++i )
         try {
             const TerminalBody & tbody = dynamic_cast<TerminalBody&>(*body.sequence[i]);
             if( GlobalSymbolTable::existsNullaryOperator(tbody.name.lexeme) ) {
@@ -113,8 +113,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             }
         }
 
-    for( int d = 0; d < body.sequence.size(); ++d )
-        for( int i = 0, j = d + i; j < body.sequence.size(); ++i, ++j ) {
+    for( unsigned d = 0; d < body.sequence.size(); ++d )
+        for( unsigned i = 0, j = d + i; j < body.sequence.size(); ++i, ++j ) {
             /* First, let's try to interpret sequence[i, i+1,...,j] as a prefix
              * operator followed by its operands. */
             if( dp[i+1][j].valid &&
@@ -151,7 +151,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             /* Finnaly, binary overloads.
              * We are updating dp[i][j] and will try to form a new parse
              * tree whose root is the operator at body.sequence[k]. */
-            for( int k = i+1; k <= j-1; ++k )
+            for( unsigned k = i+1; k <= j-1; ++k )
                 if( dp[i][k-1].valid && dp[k+1][j].valid &&
                     TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
                 {
