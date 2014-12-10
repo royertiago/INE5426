@@ -21,7 +21,7 @@ namespace GlobalSymbolTable {
     /* Throws an exception if either
      *  - type is F and there is a category with same name, or
      *  - such an operator already exists with different priority. */
-    void insertOverload( std::string name, int type, int priority,
+    void insertOverload( std::string name, std::string format, unsigned priority,
             std::unique_ptr<OperatorOverload> overload );
 
     bool existsBinaryOperator( std::string name );
