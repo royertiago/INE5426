@@ -22,7 +22,7 @@ namespace {
 
 std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<NullaryOverload>();
-    ptr->body = std::move( buildExpressionTree(*def.body) );
+    ptr->body = std::move( buildExpressionTree(*def.body, LocalSymbolTable()) );
     return std::move( ptr );
 }
 
@@ -38,7 +38,7 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
         table = collectVariables( static_cast<const OperatorVariable&>(*def.names[1]) );
     }
 
-    ptr->body = std::move( buildExpressionTree(*def.body) );
+    ptr->body = std::move( buildExpressionTree(*def.body, table) );
     return std::move( ptr );
 }
 
@@ -47,7 +47,7 @@ std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def )
     ptr->left = std::make_unique<OperatorVariable>( *def.names[0] );
     ptr->right = std::make_unique<OperatorVariable>( *def.names[2] );
     auto table = collectVariables( *ptr->left ).merge(collectVariables( *ptr->right ));
-    ptr->body = std::move( buildExpressionTree(*def.body) );
+    ptr->body = std::move( buildExpressionTree(*def.body, table) );
     return std::move( ptr );
 }
 
@@ -62,8 +62,8 @@ std::unique_ptr<OperatorBody> buildExpressionPairBody(
         const LocalSymbolTable& table )
 {
     return std::make_unique<PairBody>(
-            std::move( buildExpressionTree(body.first) ),
-            std::move( buildExpressionTree(body.second) )
+            std::move( buildExpressionTree( *body.first,  table ) ),
+            std::move( buildExpressionTree( *body.second, table) )
             );
 }
 
