@@ -11,8 +11,8 @@ namespace GlobalSymbolTable {
 namespace tables {
     std::unordered_map<std::string, std::unique_ptr<Category>> category;
     std::unordered_map<std::string, std::unique_ptr<NullaryOperator>> nullary;
-    std::unordered_map<std::string, std::unique_ptr<PostfixOperator>> postfix;
-    std::unordered_map<std::string, std::unique_ptr<ProfixOperator>> prefix;
+    std::unordered_map<std::string, std::unique_ptr<UnaryOperator>> postfix;
+    std::unordered_map<std::string, std::unique_ptr<UnaryOperator>> prefix;
     std::unordered_map<std::string, std::unique_ptr<BinaryOperator>> binary;
 } // namespace tables
 
@@ -169,7 +169,7 @@ const BinaryOperator * retrieveBinaryOperator( std::string name ) {
     return iter->second.get();
 }
 
-} // namespace global symbol table
+} // namespace GlobalSymbolTable
 
 // Implementation of LocalSymbolTable methods.
 void LocalSymbolTable::insert( std::string name ) {

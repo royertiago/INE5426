@@ -32,7 +32,7 @@ struct semantic_error : public std::runtime_error {
     semantic_error( const char * what ) :
         runtime_error( what )
     {}
-    semantic_error( std::string & what ) :
+    semantic_error( const std::string & what ) :
         runtime_error( what )
     {}
 };

@@ -79,11 +79,11 @@ struct OperatorBase : public Symbol {
 struct NullaryOperator : public OperatorBase<NullaryOverload> {
     NullaryOperator( std::string name ) : OperatorBase<NullaryOverload>( name ) {}
 };
-struct UnaryOperator : public OperatorBase<NullaryOverload> {
+struct UnaryOperator : public OperatorBase<UnaryOverload> {
     UnaryOperator( std::string name ) : OperatorBase<UnaryOverload>( name ) {}
     unsigned operand_priority;
 };
-struct BinaryOperator : public OperatorBase<NullaryOverload> {
+struct BinaryOperator : public OperatorBase<BinaryOverload> {
     BinaryOperator( std::string name ) : OperatorBase<BinaryOverload>( name ) {}
     unsigned left_priority;
     unsigned right_priority;
