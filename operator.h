@@ -65,7 +65,11 @@ template <typename Overload>
 struct OperatorBase : public Symbol {
     std::vector<std::unique_ptr<Overload>> overloads;
     void insert( std::unique_ptr<OperatorOverload>&& overload ) {
-        overloads.emplace_back( std::move(overload) );
+        Overload * ptr = &dynamic_cast<Overload&>( *overload );
+        overload.release();
+        /* We needed to do this in two steps in order to not leak
+         * memory if the cast throws an exception. */
+        overloads.emplace_back( ptr );
     }
     unsigned priority;
 };
