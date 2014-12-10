@@ -9,12 +9,12 @@ namespace GlobalSymbolTable {
 
 /* Separate symbol tables for each type of symbol. */
 namespace tables {
-    std::map<std::string, std::unique_ptr<Category>> category;
-    std::map<std::string, std::unique_ptr<NullaryOperator>> nullary;
-    std::map<std::string, std::unique_ptr<PostfixOperator>> postfix;
-    std::map<std::string, std::unique_ptr<PrefixOperator>> prefix;
-    std::map<std::string, std::unique_ptr<BinaryOperator>> binary;
-}
+    std::unordered_map<std::string, std::unique_ptr<Category>> category;
+    std::unordered_map<std::string, std::unique_ptr<NullaryOperator>> nullary;
+    std::unordered_map<std::string, std::unique_ptr<PostfixOperator>> postfix;
+    std::unordered_map<std::string, std::unique_ptr<ProfixOperator>> prefix;
+    std::unordered_map<std::string, std::unique_ptr<BinaryOperator>> binary;
+} // namespace tables
 
 void insertCategory( std::string name ) {
     tables::category.emplace( name, Category::next(name) );
