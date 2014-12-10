@@ -117,8 +117,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
         for( unsigned i = 0, j = d + i; j < body.sequence.size(); ++i, ++j ) {
             /* First, let's try to interpret sequence[i, i+1,...,j] as a prefix
              * operator followed by its operands. */
-            if( dp[i+1][j].valid &&
-                TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[i].get()))
+            if( const TerminalBody * tbody = !dp[i+1][j].valid ? nullptr :
+                                        dynamic_cast<const TerminalBody*>(body.sequence[i].get()))
             {
                 std::string name = tbody->name.lexeme;
                 if( dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) ) {
@@ -131,8 +131,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                 }
             }
             /* Now, we will try an interpretation as postfix operator. */
-            if( dp[i][j-1].valid &&
-                TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
+            if( const TerminalBody * tbody = !dp[i][j-1].valid ? nullptr :
+                                        dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
             {
                 std::string name = tbody->name.lexeme;
                 if( dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) ) {
@@ -152,8 +152,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
              * We are updating dp[i][j] and will try to form a new parse
              * tree whose root is the operator at body.sequence[k]. */
             for( unsigned k = i+1; k <= j-1; ++k )
-                if( dp[i][k-1].valid && dp[k+1][j].valid &&
-                    TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
+                if( const TerminalBody * tbody = !dp[k+1][j].valid ? nullptr :
+                                            dynamic_cast<const TerminalBody*>(body.sequence[k].get()))
                 {
                     std::string name = tbody->name.lexeme;
                     if( dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
@@ -198,14 +198,14 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
 }
 
 
-#define AUX_TYPE(type)                                                                      \
-    {                                                                                       \
-        type_index(typeid(type)),                                                           \
-        static_cast<ExpressionTreeBuilder>(                                                 \
-            []( const OperatorBody& body, const LocalSymbolTable& table ) {                 \
-                return std::move(buildExpression##type( dynamic_cast<type&>(body), table)); \
-            }                                                                               \
-        )                                                                                   \
+#define AUX_TYPE(type)                                                                              \
+    {                                                                                               \
+        std::type_index(typeid(type)),                                                              \
+        static_cast<ExpressionTreeBuilder>(                                                         \
+            []( const OperatorBody& body, const LocalSymbolTable& table ) {                         \
+                return std::move(buildExpression##type( dynamic_cast<const type&>(body), table));   \
+            }                                                                                       \
+        )                                                                                           \
     }
 
 std::unique_ptr<OperatorBody> buildExpressionTree(
