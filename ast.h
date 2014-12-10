@@ -75,8 +75,12 @@ struct RestrictedVariable : public OperatorVariable {
 
 struct NumericVariable : public OperatorVariable {
     NumericVariable() = default;
-    NumericVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+    NumericVariable( auto&& t, auto&& v ) :
+        name(AUX_FORWARD(t)),
+        value(AUX_FORWARD(v))
+    {}
     Token name;
+    unsigned value;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NumericVariable * clone() const override;
 };
