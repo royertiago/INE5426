@@ -33,17 +33,17 @@ namespace GlobalSymbolTable {
     /* Returns the minimum priority a prefix/postfix/left/right
      * operand can have. This function takes account for the grouping
      * of operators, defined by it's types. */
-    int maximumPrefixPriority( std::string operator_name );
-    int maximumPostfixPriority( std::string operator_name );
-    int maximumLeftPriority( std::string operator_name );
-    int maximumRightPriority( std::string operator_name );
+    unsigned maximumPrefixPriority( std::string operator_name );
+    unsigned maximumPostfixPriority( std::string operator_name );
+    unsigned maximumLeftPriority( std::string operator_name );
+    unsigned maximumRightPriority( std::string operator_name );
 
     /* Retrieves the priority of the operator.
      * assumes existsOperator*. */
-    int nullaryOperatorPriority( std::string operator_name );
-    int prefixOperatorPriority( std::string operator_name );
-    int postfixOperatorPriority( std::string operator_name );
-    int binaryOperatorPriority( std::string operator_name );
+    unsigned nullaryOperatorPriority( std::string operator_name );
+    unsigned prefixOperatorPriority( std::string operator_name );
+    unsigned postfixOperatorPriority( std::string operator_name );
+    unsigned binaryOperatorPriority( std::string operator_name );
 
     /* Returns pointers to the requested operators,
      * or nullptr if no such operator exists in this file. */
@@ -51,7 +51,7 @@ namespace GlobalSymbolTable {
     const UnaryOperator * retrievePrefixOperator( std::string name );
     const UnaryOperator * retrievePostfixOperator( std::string name );
     const BinaryOperator * retrieveBinaryOperator( std::string name );
-};
+}
 
 /* Local symbol table used to store the operator variables. */
 class LocalSymbolTable {

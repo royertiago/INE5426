@@ -118,53 +118,53 @@ bool existsOperator( std::string name ) {
            existsBinaryOperator(name);
 }
 
-int maximumPrefixPriority( std::string operator_name ) {
-    return table::prefix[name].operand_priority;
+unsigned maximumPrefixPriority( std::string operator_name ) {
+    return tables::prefix[operator_name]->operand_priority;
 }
-int maximumPostfixPriority( std::string operator_name ) {
-    return table::postfix[name].operand_priority;
+unsigned maximumPostfixPriority( std::string operator_name ) {
+    return tables::postfix[operator_name]->operand_priority;
 }
-int maximumLeftPriority( std::string operator_name ) {
-    return table::binary[name].left;
+unsigned maximumLeftPriority( std::string operator_name ) {
+    return tables::binary[operator_name]->left_priority;
 }
-int maximumRightPriority( std::string operator_name ) {
-    return table::binary[name].right;
-}
-
-int nullaryOperatorPriority( std::string operator_name ) {
-    return table::nullary[name].priority;
-}
-int prefixOperatorPriority( std::string operator_name ) {
-    return table::prefix[name].priority;
-}
-int postfixOperatorPriority( std::string operator_name ) {
-    return table::postfix[name].priority;
-}
-int binaryOperatorPriority( std::string operator_name ) {
-    return table::binary[name].priority;
+unsigned maximumRightPriority( std::string operator_name ) {
+    return tables::binary[operator_name]->right_priority;
 }
 
-const NullaryOperator * retrieveNullaryOperator( std::string name );
-    auto iter = table::nullary.find( name );
-    if( iter == table::nullary.end() )
+unsigned nullaryOperatorPriority( std::string name ) {
+    return tables::nullary[name]->priority;
+}
+unsigned prefixOperatorPriority( std::string name ) {
+    return tables::prefix[name]->priority;
+}
+unsigned postfixOperatorPriority( std::string name ) {
+    return tables::postfix[name]->priority;
+}
+unsigned binaryOperatorPriority( std::string name ) {
+    return tables::binary[name]->priority;
+}
+
+const NullaryOperator * retrieveNullaryOperator( std::string name ) {
+    auto iter = tables::nullary.find( name );
+    if( iter == tables::nullary.end() )
         return nullptr;
     return iter->second.get();
 }
 const UnaryOperator * retrievePrefixOperator( std::string name ) {
-    auto iter = table::prefix.find( name );
-    if( iter == table::prefix.end() )
+    auto iter = tables::prefix.find( name );
+    if( iter == tables::prefix.end() )
         return nullptr;
     return iter->second.get();
 }
 const UnaryOperator * retrievePostfixOperator( std::string name ) {
-    auto iter = table::postfix.find( name );
-    if( iter == table::postfix.end() )
+    auto iter = tables::postfix.find( name );
+    if( iter == tables::postfix.end() )
         return nullptr;
     return iter->second.get();
 }
 const BinaryOperator * retrieveBinaryOperator( std::string name ) {
-    auto iter = table::binary.find( name );
-    if( iter == table::binary.end() )
+    auto iter = tables::binary.find( name );
+    if( iter == tables::binary.end() )
         return nullptr;
     return iter->second.get();
 }
