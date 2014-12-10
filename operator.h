@@ -32,6 +32,7 @@
  * and postfix: each node has a pointer to its version of the operator.
  */
 struct OperatorOverload : public Statement {
+    std::string name;
     std::unique_ptr<OperatorBody> body;
     /* Class invariant: the only instances in the tree below
      * 'body' are TreeNodeBody, NumericBody, VariableBody
@@ -63,6 +64,7 @@ struct BinaryOverload : public OperatorOverload {
 
 template <typename Overload>
 struct OperatorBase : public Symbol {
+    OperatorBase( std::string name ) : Symbol( name ) {}
     std::vector<std::unique_ptr<Overload>> overloads;
     void insert( std::unique_ptr<OperatorOverload>&& overload ) {
         Overload * ptr = &dynamic_cast<Overload&>( *overload );
@@ -75,11 +77,14 @@ struct OperatorBase : public Symbol {
 };
 
 struct NullaryOperator : public OperatorBase<NullaryOverload> {
+    NullaryOperator( std::string name ) : OperatorBase<NullaryOverload>( name ) {}
 };
 struct UnaryOperator : public OperatorBase<NullaryOverload> {
+    UnaryOperator( std::string name ) : OperatorBase<UnaryOverload>( name ) {}
     unsigned operand_priority;
 };
 struct BinaryOperator : public OperatorBase<NullaryOverload> {
+    BinaryOperator( std::string name ) : OperatorBase<BinaryOverload>( name ) {}
     unsigned left_priority;
     unsigned right_priority;
 };
