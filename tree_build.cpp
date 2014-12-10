@@ -44,8 +44,8 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
 
 std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<BinaryOverload>();
-    ptr->left = std::make_unique<OperatorVariable>( *def.names[0] );
-    ptr->right = std::make_unique<OperatorVariable>( *def.names[2] );
+    ptr->left.reset(static_cast<OperatorVariable&>( *def.names[0] ).clone());
+    ptr->right.reset(static_cast<OperatorVariable&>( *def.names[2] ).clone());
     auto table = collectVariables( *ptr->left ).merge(collectVariables( *ptr->right ));
     ptr->body = std::move( buildExpressionTree(*def.body, table) );
     return std::move( ptr );
@@ -122,10 +122,10 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             {
                 std::string name = tbody->name.lexeme;
                 if( dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) ) {
-                    dp[i][j].data = std::make_unique<UnaryTreeBody>(
+                    dp[i][j].data = std::move( std::make_unique<UnaryTreeBody>(
                             GlobalSymbolTable::retrievePrefixOperator(name),
                             dp[i+1][j].data->clone()
-                        );
+                        ) );
                     dp[i][j].priority = GlobalSymbolTable::prefixOperatorPriority(name);
                     dp[i][j].valid = true;
                 }
@@ -140,10 +140,10 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                         dp[i][j].valid = false;
                         continue;
                     }
-                    dp[i][j].data = std::make_unique<UnaryTreeBody>(
+                    dp[i][j].data = std::move( std::make_unique<UnaryTreeBody>(
                             GlobalSymbolTable::retrievePostfixOperator(name),
                             dp[i][j-1].data->clone()
-                        );
+                        ) );
                     dp[i][j].priority = GlobalSymbolTable::postfixOperatorPriority(name);
                     dp[i][j].valid = true;
                 }
@@ -163,11 +163,11 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                             dp[i][j].valid = false;
                             goto end_external_loop;
                         }
-                        dp[i][j].data = std::make_unique<BinaryOperator>(
+                        dp[i][j].data = std::move( std::make_unique<BinaryTreeBody>(
                             GlobalSymbolTable::retrieveBinaryOperator(name),
                             dp[i][k-1].data->clone(),
                             dp[k+1][j].data->clone()
-                        );
+                            ) );
                         dp[i][j].valid = true;
                         dp[i][j].priority = GlobalSymbolTable::binaryOperatorPriority(name);
                     }
