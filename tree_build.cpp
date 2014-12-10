@@ -90,12 +90,12 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
     for( int i = 0; i < body.sequence.size(); ++i )
         try {
             const TerminalBody & tbody = dynamic_cast<TerminalBody&>(*body.sequence[i]);
-            if( GlobalSymbolTable::existsNullaryOperator(tbody.token.lexeme) ) {
-                dp[i][i].date = std::make_unique<NullaryTreeBody>(
-                        GlobalSymbolTable::retrieveNullaryOperator(tbody.token.lexeme)
+            if( GlobalSymbolTable::existsNullaryOperator(tbody.name.lexeme) ) {
+                dp[i][i].data = std::make_unique<NullaryTreeBody>(
+                        GlobalSymbolTable::retrieveNullaryOperator(tbody.name.lexeme)
                     );
                 dp[i][i].valid = true;
-                dp[i][i].priority = GlobalSymbolTable::nullaryOperatorPriority(tbody.token.lexeme);
+                dp[i][i].priority = GlobalSymbolTable::nullaryOperatorPriority(tbody.name.lexeme);
             }
         } catch( std::bad_cast & ex ) {
             try{
@@ -120,21 +120,21 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             if( dp[i+1][j].valid &&
                 TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[i].get()))
             {
-                std::string name = tbody->token.lexeme;
+                std::string name = tbody->name.lexeme;
                 if( dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) ) {
                     dp[i][j].data = std::make_unique<UnaryTreeBody>(
                             GlobalSymbolTable::retrievePrefixOperator(name),
                             dp[i+1][j].data->clone()
                         );
                     dp[i][j].priority = GlobalSymbolTable::prefixOperatorPriority(name);
-                    dp[i][j].state = Data::VALID;
+                    dp[i][j].valid = true;
                 }
             }
             /* Now, we will try an interpretation as postfix operator. */
             if( dp[i][j-1].valid &&
                 TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
             {
-                std::string name = tbody->token.lexeme;
+                std::string name = tbody->name.lexeme;
                 if( dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) ) {
                     if( dp[i][j].valid ) {
                         dp[i][j].valid = false;
@@ -145,7 +145,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                             dp[i][j-1].data->clone()
                         );
                     dp[i][j].priority = GlobalSymbolTable::postfixOperatorPriority(name);
-                    dp[i][j].state = Data::VALID;
+                    dp[i][j].valid = true;
                 }
             }
             /* Finnaly, binary overloads.
@@ -155,7 +155,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                 if( dp[i][k-1].valid && dp[k+1][j].valid &&
                     TerminalBody * tbody = dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
                 {
-                    std::string name = tbody->name;
+                    std::string name = tbody->name.lexeme;
                     if( dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
                      && dp[k+1][j].priority < GlobalSymbolTable::maximumRightPriority(name))
                     {
@@ -165,8 +165,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                         }
                         dp[i][j].data = std::make_unique<BinaryOperator>(
                             GlobalSymbolTable::retrieveBinaryOperator(name),
-                            dp[i][k-1].data->clone();
-                            dp[k+1][j].data->clone();
+                            dp[i][k-1].data->clone(),
+                            dp[k+1][j].data->clone()
                         );
                         dp[i][j].valid = true;
                         dp[i][j].priority = GlobalSymbolTable::binaryOperatorPriority(name);
@@ -176,24 +176,24 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
 end_external_loop:;
         }
 
-    if( !pd[0][body.sequence.size()-1].valid )
+    if( !dp[0][body.sequence.size()-1].valid )
         throw semantic_error( "No viable semantic parsing found for given operators." );
 
-    return std::move( pd[0][body.sequence.size()-1].data );
+    return std::move( dp[0][body.sequence.size()-1].data );
 }
 
 std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
         const TerminalBody& body,
         const LocalSymbolTable& table )
 {
-    if( body.name.id == NUM )
+    if( body.name.id == Token::NUM )
         return std::make_unique<NumericBody>(
-                std::strtol( body.name.lexeme.begin(), 0, 10 ) // porque foda-se o Melga
+                std::strtol( body.name.lexeme.c_str(), 0, 10 ) // porque foda-se o Melga
         );
     if( table.contains( body.name.lexeme ) )
         return std::make_unique<VariableBody>( body.name.lexeme );
 
-    throw semantic_error( "Terminal " + body.name + "is not a number neiter a variable" );
+    throw semantic_error( "Terminal " + body.name.lexeme + "is not a number neiter a variable" );
     // TODO: maybe this behavior is unwanted according to buildExpressionSequenceBody.
 }
 
@@ -212,12 +212,12 @@ std::unique_ptr<OperatorBody> buildExpressionTree(
         const OperatorBody& body,
         const LocalSymbolTable& table )
 {
-    std::map<type_index, ExpressionTreeBuilder> functions = {
+    std::unordered_map<std::type_index, ExpressionTreeBuilder> functions = {
         AUX_TYPE(PairBody),
         AUX_TYPE(SequenceBody),
         AUX_TYPE(TerminalBody),
     };
-    return std::move( functions.at(type_index(typeid(body)))(body, table) );
+    return std::move( functions.at(std::type_index(typeid(body)))(body, table) );
 }
 
 typedef void(* InsertorFunction )( const OperatorVariable &, LocalSymbolTable & );
