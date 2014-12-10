@@ -21,16 +21,16 @@ void insertCategory( std::string name ) {
 }
 
 bool existsCategory( std::string name ) {
-    return tables::category.count(key) != 0;
+    return tables::category.count(name) != 0;
 }
 
 unsigned categoryValue( std::string name ) {
-    return tables::category[key]->value;
+    return tables::category[name]->value;
 }
 
 void insertOverload( std::string name, std::string format,
         unsigned priority, std::unique_ptr<OperatorOverload>&& overload )
- {
+{
     if( format == "F" ) {
         if( tables::category.count(name) != 0 )
             throw semantic_error( "There is already a category named " + name );
