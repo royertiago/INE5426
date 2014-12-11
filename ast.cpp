@@ -5,6 +5,7 @@
  */
 #include <ostream>
 #include "ast.h"
+#include "operator.h"
 
 std::ostream& OperatorName::print_to( std::ostream& os ) const {
     return os << "{OpName}" << name;
@@ -68,6 +69,27 @@ std::ostream& TerminalBody::print_to( std::ostream& os ) const {
 }
 TerminalBody * TerminalBody::clone() const {
     return new TerminalBody{ name };
+}
+
+std::ostream& NullaryTreeBody::print_to( std::ostream& os ) const {
+    return os << "{NullaryTreeBody} " << op->name;
+}
+NullaryTreeBody * NullaryTreeBody::clone() const {
+    return new NullaryTreeBody{ op }; // note there is no 'clone'
+}
+
+std::ostream& UnaryTreeBody::print_to( std::ostream& os ) const {
+    return os << "{UnaryTreeBody} " << op->name << " " << *variable;
+}
+UnaryTreeBody * UnaryTreeBody::clone() const {
+    return new UnaryTreeBody{ op, variable->clone() };
+}
+
+std::ostream& BinaryTreeBody::print_to( std::ostream& os ) const {
+    return os << "{BinaryTreeBody} " << *left << " " << op->name << " " << *right;
+}
+BinaryTreeBody * BinaryTreeBody::clone() const {
+    return new BinaryTreeBody{ op, left->clone(), right->clone() };
 }
 
 std::ostream& IncludeCommand::print_to( std::ostream& os ) const {
