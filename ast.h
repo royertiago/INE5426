@@ -210,12 +210,16 @@ struct Statement : public Printable {
 };
 
 struct IncludeCommand : public Statement {
+    IncludeCommand() = default;
+    IncludeCommand( auto&& n ) : filename(AUX_FORWARD(n)) {}
     Token filename;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual IncludeCommand * clone() const override;
 };
 
 struct CategoryDefinition : public Statement {
+    CategoryDefinition() = default;
+    CategoryDefinition( auto&& n ) : name(AUX_FORWARD(n)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual CategoryDefinition * clone() const override;
