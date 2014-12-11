@@ -179,3 +179,8 @@ void LocalSymbolTable::insert( std::string name ) {
 bool LocalSymbolTable::contains( std::string name ) const {
     return table.count( name ) != 0;
 }
+
+LocalSymbolTable & LocalSymbolTable::merge( const LocalSymbolTable & other ) {
+    table.insert( other.table.begin(), other.table.end() );
+    return *this;
+}
