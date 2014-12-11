@@ -3,6 +3,7 @@
  * The only functions implemented here are the "print_to", inherited
  * from Printable.
  */
+#include <ostream>
 #include "ast.h"
 
 std::ostream& OperatorName::print_to( std::ostream& os ) const {

@@ -5,7 +5,7 @@
 #ifndef PRINTABLE_HPP
 #define PRINTABLE_HPP
 
-#include <ostream>
+#include <iosfwd>
 
 struct Printable {
     virtual ~Printable() = default;

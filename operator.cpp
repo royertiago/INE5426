@@ -2,6 +2,7 @@
  * Implementation of operator.h
  */
 
+#include <ostream>
 #include "operator.h"
 
 std::ostream& NullaryOverload::print_to( std::ostream& os ) const {

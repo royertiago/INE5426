@@ -10,8 +10,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <iosfwd>
 #include <string>
-#include <ostream>
 
 struct Token {
     enum {
