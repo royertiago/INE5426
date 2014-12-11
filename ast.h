@@ -144,7 +144,7 @@ struct TerminalBody : public OperatorBody {
  * during semantic analysis. */
 struct VariableBody : public OperatorBody {
     VariableBody() = default;
-    VariableBody( auto&& t ) : name(AUX_FORWARD(t)) {}
+    VariableBody( auto&& n ) : name(AUX_FORWARD(n)) {}
     std::string name;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual VariableBody * clone() const override;
@@ -152,7 +152,7 @@ struct VariableBody : public OperatorBody {
 
 struct NumericBody : public OperatorBody {
     NumericBody() = default;
-    NumericBody( auto&& t ) : value(AUX_FORWARD(t)) {}
+    NumericBody( auto&& v ) : value(AUX_FORWARD(v)) {}
     int value;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NumericBody * clone() const override;

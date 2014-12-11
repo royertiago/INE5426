@@ -71,6 +71,20 @@ TerminalBody * TerminalBody::clone() const {
     return new TerminalBody{ name };
 }
 
+std::ostream& VariableBody::print_to( std::ostream& os ) const {
+    return os << name;
+}
+VariableBody * VariableBody::clone() const {
+    return new VariableBody{ name };
+}
+
+std::ostream& NumericBody::print_to( std::ostream& os ) const {
+    return os << value;
+}
+NumericBody * NumericBody::clone() const {
+    return new NumericBody{ value };
+}
+
 std::ostream& NullaryTreeBody::print_to( std::ostream& os ) const {
     return os << "{NullaryTreeBody} " << op->name;
 }
