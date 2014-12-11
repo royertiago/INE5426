@@ -40,8 +40,8 @@ struct OperatorOverload : public Statement {
      * shall have had gone through semantic analysis and replaced
      * with suitable instances of VariableBody and NumericBody,
      * and of TreeNodeBody, respectively. */
-    virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual OperatorOverload * clone() const override;
+    virtual std::ostream& print_to( std::ostream& ) const = 0;
+    virtual OperatorOverload * clone() const = 0;
 };
 
 struct NullaryOverload : public OperatorOverload {
