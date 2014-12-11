@@ -13,6 +13,8 @@
 #include "ast.h"
 #include "symbol.h"
 
+#define AUX_FORWARD(var) std::forward<decltype(var)>(var)
+
 /* OperatorOverload contains all the information about a specific
  * overload of an operator. The overloads are selected at runtime.
  *
@@ -32,6 +34,11 @@
  * and postfix: each node has a pointer to its version of the operator.
  */
 struct OperatorOverload : public Statement {
+    OperatorOverload() = default;
+    OperatorOverload( auto&& n, auto&& b ) :
+        name( AUX_FORWARD(n) ),
+        body( AUX_FORWARD(b) )
+    {}
     std::string name;
     std::unique_ptr<OperatorBody> body;
     /* Class invariant: the only instances in the tree below
@@ -45,17 +52,32 @@ struct OperatorOverload : public Statement {
 };
 
 struct NullaryOverload : public OperatorOverload {
+    NullaryOverload() = default;
+    NullaryOverload( auto&& n, auto&& b ) :
+        OperatorOverload( AUX_FORWARD(n), AUX_FORWARD(b) )
+    {}
     // There is no signature.
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NullaryOverload * clone() const override;
 };
 
 struct UnaryOverload : public OperatorOverload {
+    UnaryOverload() = default;
+    UnaryOverload( auto&& n, auto&& b, auto&& v ) :
+        OperatorOverload( AUX_FORWARD(n), AUX_FORWARD(b) ),
+        variable( AUX_FORWARD(v) )
+    {}
     std::unique_ptr<OperatorVariable> variable;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual UnaryOverload * clone() const override;
 };
 struct BinaryOverload : public OperatorOverload {
+    BinaryOverload() = default;
+    BinaryOverload( auto&& n, auto&& b, auto&& l, auto&& r ) :
+        OperatorOverload( AUX_FORWARD(n), AUX_FORWARD(b) ),
+        left( AUX_FORWARD(l) ),
+        right( AUX_FORWARD(r) )
+    {}
     std::unique_ptr<OperatorVariable> left;
     std::unique_ptr<OperatorVariable> right;
     virtual std::ostream& print_to( std::ostream& ) const override;
