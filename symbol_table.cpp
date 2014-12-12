@@ -100,16 +100,16 @@ void insertOverload( std::string name, std::string format,
 }
 
 bool existsBinaryOperator( std::string name ) {
-    return retrieveBinaryOperator( name ) == nullptr;
+    return retrieveBinaryOperator( name ) != nullptr;
 }
 bool existsPrefixOperator( std::string name ) {
-    return retrievePrefixOperator( name ) == nullptr;
+    return retrievePrefixOperator( name ) != nullptr;
 }
 bool existsPostfixOperator( std::string name ) {
-    return retrievePostfixOperator( name ) == nullptr;
+    return retrievePostfixOperator( name ) != nullptr;
 }
 bool existsNullaryOperator( std::string name ) {
-    return retrieveNullaryOperator( name ) == nullptr;
+    return retrieveNullaryOperator( name ) != nullptr;
 }
 bool existsOperator( std::string name ) {
     return existsNullaryOperator(name) ||
