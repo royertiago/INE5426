@@ -30,7 +30,7 @@ void SemanticAnalyser::compute_next() {
     try {
         auto ptr = _current_parser->next();
 
-        if( typeid(ptr.get()) != typeid(OperatorDefinition*) ) {
+        if( typeid(*ptr) != typeid(OperatorDefinition) ) {
             _next = std::move( ptr );
             return;
         }
