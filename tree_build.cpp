@@ -23,6 +23,7 @@ namespace {
 std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<NullaryOverload>();
     ptr->body = std::move( buildExpressionTree(*def.body, LocalSymbolTable()) );
+    ptr->name = static_cast<const OperatorName&>(*def.names[0]).name.lexeme;
     return std::move( ptr );
 }
 
@@ -31,11 +32,13 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
     LocalSymbolTable table;
     if( def.format[0] == 'f' ) {
         ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[1]).clone());
-        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[0]) );
+        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[1]) );
+        ptr->name = static_cast<const OperatorName&>(*def.names[0]).name.lexeme;
     }
     else {
         ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[0]).clone());
-        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[1]) );
+        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[0]) );
+        ptr->name = static_cast<const OperatorName&>(*def.names[1]).name.lexeme;
     }
 
     ptr->body = std::move( buildExpressionTree(*def.body, table) );
@@ -45,6 +48,7 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
 std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<BinaryOverload>();
     ptr->left.reset(static_cast<OperatorVariable&>( *def.names[0] ).clone());
+    ptr->name = static_cast<OperatorName&>(*def.names[1]).name.lexeme;
     ptr->right.reset(static_cast<OperatorVariable&>( *def.names[2] ).clone());
     auto table = collectVariables( *ptr->left ).merge(collectVariables( *ptr->right ));
     ptr->body = std::move( buildExpressionTree(*def.body, table) );
