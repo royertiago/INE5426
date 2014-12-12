@@ -31,7 +31,7 @@ unsigned categoryValue( std::string name ) {
 void insertOverload( std::string name, std::string format,
         unsigned priority, std::unique_ptr<OperatorOverload>&& overload )
 {
-    if( format == "F" ) {
+    if( format == "f" ) {
         if( tables::category.count(name) != 0 )
             throw semantic_error( "There is already a category named " + name );
 
@@ -47,13 +47,13 @@ void insertOverload( std::string name, std::string format,
         else if( op.priority != priority )
             throw semantic_error( "Conflicting operator priorities for " + name );
     }
-    else if( format == "YF" || format == "XF" || format == "FY" || format == "FX" ) {
+    else if( format == "yf" || format == "xf" || format == "fy" || format == "fx" ) {
         auto ptr = &tables::postfix;
         unsigned operator_priority = priority;
         unsigned operand_priority = priority;
-        if( format == "FX" || format == "XF" )
+        if( format == "fx" || format == "xf" )
             operand_priority--;
-        if( format == "FX" || format == "FY" )
+        if( format == "fx" || format == "fy" )
             ptr = &tables::prefix;
 
         bool operator_exists = ptr->count(name) != 0;
@@ -72,12 +72,12 @@ void insertOverload( std::string name, std::string format,
         else if( operand_priority != op.operand_priority )
             throw semantic_error( "Conflicting types for operator " + name );
     }
-    else if( format == "XFX" || format == "XFY" || format == "YFX" ) {
+    else if( format == "xfx" || format == "xfy" || format == "yfx" ) {
         unsigned left_priority = priority;
         unsigned right_priority = priority;
-        if( format != "YFX" )
+        if( format != "yfx" )
             left_priority--;
-        if( format != "XFY" )
+        if( format != "xfy" )
             right_priority--;
 
         bool operator_exists = tables::binary.count(name) != 0;
