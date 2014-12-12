@@ -95,7 +95,10 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
         try {
             dp[i][i].data = std::move( buildExpressionTree(*body.sequence[i], table) );
             dp[i][i].valid = true;
-            dp[i][i].priority = 0;
+            if( auto op = dynamic_cast<const NullaryTreeBody *>( dp[i][i].data.get() ) )
+                dp[i][i].priority = GlobalSymbolTable::nullaryOperatorPriority(op->op->name);
+            else
+                dp[i][i].priority = 0;
         } catch( semantic_error & ) {
             /* The occurrence of an exception means that the tree below body.sequence[i]
              * cannot be parsed properly as a single atom, so we are correct
