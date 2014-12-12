@@ -101,7 +101,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
              * to keep the default invalid state. */
         }
 
-    for( unsigned d = 0; d < body.sequence.size(); ++d )
+    for( unsigned d = 1; d < body.sequence.size(); ++d )
         for( unsigned i = 0, j = d + i; j < body.sequence.size(); ++i, ++j ) {
             /* First, let's try to interpret sequence[i, i+1,...,j] as a prefix
              * operator followed by its operands. */
