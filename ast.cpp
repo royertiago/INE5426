@@ -8,7 +8,7 @@
 #include "operator.h"
 
 std::ostream& OperatorName::print_to( std::ostream& os ) const {
-    return os << "{OpName}" << name;
+    return os << "{OpName} " << name;
 }
 OperatorName * OperatorName::clone() const {
     return new OperatorName{ name };
@@ -43,18 +43,16 @@ PairVariable * PairVariable::clone() const {
 }
 
 std::ostream& PairBody::print_to( std::ostream& os ) const {
-    return os << '{' << *first << ", " << *second << '}';
+    return os << "{{PairBody} " << *first << ", " << *second << '}';
 }
 PairBody * PairBody::clone() const {
     return new PairBody{ first->clone(), second->clone() };
 }
 
 std::ostream& SequenceBody::print_to( std::ostream& os ) const {
-    const char * separator = "";
-    for( auto& e : sequence ) {
-        os << separator << *e;
-        separator = " ";
-    }
+    os << "{SequenceBody}";
+    for( auto& e : sequence )
+        os << " " << *e;
     return os;
 }
 SequenceBody * SequenceBody::clone() const {
@@ -65,21 +63,21 @@ SequenceBody * SequenceBody::clone() const {
 }
 
 std::ostream& TerminalBody::print_to( std::ostream& os ) const {
-    return os << name;
+    return os << "{TerminalBody} " << name;
 }
 TerminalBody * TerminalBody::clone() const {
     return new TerminalBody{ name };
 }
 
 std::ostream& VariableBody::print_to( std::ostream& os ) const {
-    return os << name;
+    return os << "{VariableBody} " << name;
 }
 VariableBody * VariableBody::clone() const {
     return new VariableBody{ name };
 }
 
 std::ostream& NumericBody::print_to( std::ostream& os ) const {
-    return os << value;
+    return os << "{NumberBody} " << value;
 }
 NumericBody * NumericBody::clone() const {
     return new NumericBody{ value };
@@ -100,21 +98,21 @@ UnaryTreeBody * UnaryTreeBody::clone() const {
 }
 
 std::ostream& BinaryTreeBody::print_to( std::ostream& os ) const {
-    return os << "{BinaryTreeBody} " << *left << " " << op->name << " " << *right;
+    return os << "{{BinaryTreeBody} " << *left << " " << op->name << " " << *right << " }";
 }
 BinaryTreeBody * BinaryTreeBody::clone() const {
     return new BinaryTreeBody{ op, left->clone(), right->clone() };
 }
 
 std::ostream& IncludeCommand::print_to( std::ostream& os ) const {
-    return os << "include " << filename;
+    return os << "{Include} " << filename;
 }
 IncludeCommand * IncludeCommand::clone() const {
     return new IncludeCommand{ filename };
 }
 
 std::ostream& CategoryDefinition::print_to( std::ostream& os ) const {
-    return os << "category " << name;
+    return os << "{Category} " << name;
 }
 CategoryDefinition * CategoryDefinition::clone() const {
     return new CategoryDefinition{ name };
