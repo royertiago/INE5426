@@ -111,7 +111,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             {
                 std::string name = tbody->name.lexeme;
                 if( GlobalSymbolTable::existsPrefixOperator(name) &&
-                    dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) )
+                    dp[i+1][j].priority <= GlobalSymbolTable::maximumPrefixPriority(name) )
                 {
                     dp[i][j].data = std::move( std::make_unique<UnaryTreeBody>(
                             GlobalSymbolTable::retrievePrefixOperator(name),
@@ -127,7 +127,7 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
             {
                 std::string name = tbody->name.lexeme;
                 if( GlobalSymbolTable::existsPostfixOperator(name) &&
-                    dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) )
+                    dp[i][j-1].priority <= GlobalSymbolTable::maximumPostfixPriority(name) )
                 {
                     if( dp[i][j].valid ) {
                         dp[i][j].valid = false;
@@ -150,8 +150,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                 {
                     std::string name = tbody->name.lexeme;
                     if( GlobalSymbolTable::existsBinaryOperator(name)
-                     && dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
-                     && dp[k+1][j].priority < GlobalSymbolTable::maximumRightPriority(name))
+                     && dp[i][k-1].priority <= GlobalSymbolTable::maximumLeftPriority(name)
+                     && dp[k+1][j].priority <= GlobalSymbolTable::maximumRightPriority(name))
                     {
                         if( dp[i][j].valid ) {
                             dp[i][j].valid = false;
