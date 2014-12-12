@@ -89,28 +89,12 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
 
     for( unsigned i = 0; i < body.sequence.size(); ++i )
         try {
-            const TerminalBody & tbody = dynamic_cast<TerminalBody&>(*body.sequence[i]);
-            if( GlobalSymbolTable::existsNullaryOperator(tbody.name.lexeme) ) {
-                dp[i][i].data = std::make_unique<NullaryTreeBody>(
-                        GlobalSymbolTable::retrieveNullaryOperator(tbody.name.lexeme)
-                    );
-                dp[i][i].valid = true;
-                dp[i][i].priority = GlobalSymbolTable::nullaryOperatorPriority(tbody.name.lexeme);
-            }
-        } catch( std::bad_cast & ex ) {
-            try{
-                dp[i][i].data = std::move( buildExpressionTree(*body.sequence[i], table) );
-                dp[i][i].valid = true;
-            } catch( semantic_error & ex ) {
-                /* The only lines that throw exceptions we handle are the
-                 * buildExpressionTree (that does not take into account the possibility
-                 * of having a nullary operator) and the dynamic_cast (that we do
-                 * in order to test exactly this possibility).
-                 *
-                 * The occurrence of both errors means that the tree below body.sequence[i]
-                 * cannot be parsed properly as a single atom, so we are correct
-                 * to keep the default invalid state. */
-            }
+            dp[i][i].data = std::move( buildExpressionTree(*body.sequence[i], table) );
+            dp[i][i].valid = true;
+        } catch( semantic_error & ) {
+            /* The occurrence of an exception means that the tree below body.sequence[i]
+             * cannot be parsed properly as a single atom, so we are correct
+             * to keep the default invalid state. */
         }
 
     for( unsigned d = 0; d < body.sequence.size(); ++d )
@@ -193,8 +177,13 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
     if( table.contains( body.name.lexeme ) )
         return std::make_unique<VariableBody>( body.name.lexeme );
 
-    throw semantic_error( "Terminal " + body.name.lexeme + "is not a number neiter a variable" );
-    // TODO: maybe this behavior is unwanted according to buildExpressionSequenceBody.
+    if( GlobalSymbolTable::existsNullaryOperator(body.name.lexeme) )
+        return std::make_unique<NullaryTreeBody>(
+                GlobalSymbolTable::retrieveNullaryOperator(body.name.lexeme)
+            );
+
+    throw semantic_error( "Terminal " + body.name.lexeme + "is not a number,"
+            " a variable or a unary operator." );
 }
 
 
