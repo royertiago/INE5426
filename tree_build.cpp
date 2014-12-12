@@ -109,7 +109,9 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                                         dynamic_cast<const TerminalBody*>(body.sequence[i].get()))
             {
                 std::string name = tbody->name.lexeme;
-                if( dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) ) {
+                if( GlobalSymbolTable::existsPrefixOperator(name) &&
+                    dp[i+1][j].priority < GlobalSymbolTable::maximumPrefixPriority(name) )
+                {
                     dp[i][j].data = std::move( std::make_unique<UnaryTreeBody>(
                             GlobalSymbolTable::retrievePrefixOperator(name),
                             dp[i+1][j].data->clone()
@@ -123,7 +125,9 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                                         dynamic_cast<const TerminalBody*>(body.sequence[j].get()))
             {
                 std::string name = tbody->name.lexeme;
-                if( dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) ) {
+                if( GlobalSymbolTable::existsPostfixOperator(name) &&
+                    dp[i][j-1].priority < GlobalSymbolTable::maximumPostfixPriority(name) )
+                {
                     if( dp[i][j].valid ) {
                         dp[i][j].valid = false;
                         continue;
@@ -144,7 +148,8 @@ std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
                                             dynamic_cast<const TerminalBody*>(body.sequence[k].get()))
                 {
                     std::string name = tbody->name.lexeme;
-                    if( dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
+                    if( GlobalSymbolTable::existsBinaryOperator(name)
+                     && dp[i][k-1].priority < GlobalSymbolTable::maximumLeftPriority(name)
                      && dp[k+1][j].priority < GlobalSymbolTable::maximumRightPriority(name))
                     {
                         if( dp[i][j].valid ) {
