@@ -67,7 +67,7 @@ struct UnaryOverload : public OperatorOverload {
         OperatorOverload( AUX_FORWARD(n), AUX_FORWARD(b) ),
         variable( AUX_FORWARD(v) )
     {}
-    std::unique_ptr<OperatorVariable> variable;
+    std::unique_ptr<OperatorParameter> variable;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual UnaryOverload * clone() const override;
 };
@@ -78,8 +78,8 @@ struct BinaryOverload : public OperatorOverload {
         left( AUX_FORWARD(l) ),
         right( AUX_FORWARD(r) )
     {}
-    std::unique_ptr<OperatorVariable> left;
-    std::unique_ptr<OperatorVariable> right;
+    std::unique_ptr<OperatorParameter> left;
+    std::unique_ptr<OperatorParameter> right;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual BinaryOverload * clone() const override;
 };

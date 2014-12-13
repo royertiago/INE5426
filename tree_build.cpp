@@ -15,8 +15,8 @@ namespace {
      * NumericBody and TreeNodeBody. */
     std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody&, const LocalSymbolTable& );
 
-    /* Aggregates all the variables' names used inside the passed OperatorVariable. */
-    LocalSymbolTable collectVariables( const OperatorVariable & );
+    /* Aggregates all the variables' names used inside the passed OperatorParameter. */
+    LocalSymbolTable collectVariables( const OperatorParameter & );
 
 } // anonymous namespace
 
@@ -31,13 +31,13 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<UnaryOverload>();
     LocalSymbolTable table;
     if( def.format[0] == 'f' ) {
-        ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[1]).clone());
-        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[1]) );
+        ptr->variable.reset(static_cast<const OperatorParameter&>(*def.names[1]).clone());
+        table = collectVariables( static_cast<const OperatorParameter&>(*def.names[1]) );
         ptr->name = static_cast<const OperatorName&>(*def.names[0]).name.lexeme;
     }
     else {
-        ptr->variable.reset(static_cast<const OperatorVariable&>(*def.names[0]).clone());
-        table = collectVariables( static_cast<const OperatorVariable&>(*def.names[0]) );
+        ptr->variable.reset(static_cast<const OperatorParameter&>(*def.names[0]).clone());
+        table = collectVariables( static_cast<const OperatorParameter&>(*def.names[0]) );
         ptr->name = static_cast<const OperatorName&>(*def.names[1]).name.lexeme;
     }
 
@@ -47,9 +47,9 @@ std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
 
 std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<BinaryOverload>();
-    ptr->left.reset(static_cast<OperatorVariable&>( *def.names[0] ).clone());
+    ptr->left.reset(static_cast<OperatorParameter&>( *def.names[0] ).clone());
     ptr->name = static_cast<OperatorName&>(*def.names[1]).name.lexeme;
-    ptr->right.reset(static_cast<OperatorVariable&>( *def.names[2] ).clone());
+    ptr->right.reset(static_cast<OperatorParameter&>( *def.names[2] ).clone());
     auto table = collectVariables( *ptr->left ).merge(collectVariables( *ptr->right ));
     ptr->body = std::move( buildExpressionTree(*def.body, table) );
     return std::move( ptr );
@@ -222,40 +222,40 @@ std::unique_ptr<OperatorBody> buildExpressionTree(
     return std::move( functions.at(std::type_index(typeid(body)))(body, table) );
 }
 
-typedef void(* InsertorFunction )( const OperatorVariable &, LocalSymbolTable & );
+typedef void(* InsertorFunction )( const OperatorParameter &, LocalSymbolTable & );
 
-void insertVariables( const OperatorVariable & var, LocalSymbolTable & table ) {
+void insertVariables( const OperatorParameter & var, LocalSymbolTable & table ) {
     // A 'switch-case' with types
     static std::unordered_map<std::type_index, InsertorFunction > jump_table =
     {
         {
-            std::type_index(typeid(NamedVariable)),
+            std::type_index(typeid(NamedParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorVariable & var, LocalSymbolTable & table ) {
-                    auto & nvar = dynamic_cast<const NamedVariable&>(var);
+                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const NamedParameter&>(var);
                     table.insert( nvar.name.lexeme );
                 })
         },
         {
-            std::type_index(typeid(RestrictedVariable)),
+            std::type_index(typeid(RestrictedParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorVariable & var, LocalSymbolTable & table ) {
-                    auto & nvar = dynamic_cast<const RestrictedVariable&>(var);
+                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const RestrictedParameter&>(var);
                     table.insert( nvar.name.lexeme );
                 })
         },
         {
-            std::type_index(typeid(NumericVariable)),
+            std::type_index(typeid(NumericParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorVariable &, LocalSymbolTable & ) {
+                []( const OperatorParameter &, LocalSymbolTable & ) {
                     // We do not need to save numbers in the symbol table.
                 })
         },
         {
-            std::type_index(typeid(PairVariable)),
+            std::type_index(typeid(PairParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorVariable & var, LocalSymbolTable & table ) {
-                    auto & nvar = dynamic_cast<const PairVariable&>(var);
+                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                    auto & nvar = dynamic_cast<const PairParameter&>(var);
                     insertVariables( *nvar.first, table );
                     insertVariables( *nvar.second, table );
                 })
@@ -264,7 +264,7 @@ void insertVariables( const OperatorVariable & var, LocalSymbolTable & table ) {
     jump_table.at(typeid(var))( var, table );
 }
 
-LocalSymbolTable collectVariables( const OperatorVariable & var ) {
+LocalSymbolTable collectVariables( const OperatorParameter & var ) {
     LocalSymbolTable table;
     insertVariables( var, table );
     return table;

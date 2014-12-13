@@ -13,10 +13,10 @@
 
 #define AUX_FORWARD(var) std::forward<decltype(var)>(var)
 
-/* SignatureToken is either an OperatorVariable or an OperatorName.
+/* SignatureToken is either an OperatorParameter or an OperatorName.
  * Ex:
  * xfx 800 Q ** P
- * Q and P are OperatorVariables and ** is an OperatorName. */
+ * Q and P are OperatorParameters and ** is an OperatorName. */
 struct SignatureToken : public Printable {
     virtual ~SignatureToken() = default;
     virtual SignatureToken * clone() const override = 0;
@@ -30,16 +30,16 @@ struct OperatorName : public SignatureToken {
     virtual OperatorName * clone() const override;
 };
 
-/* OperatorVariable is the structure seen in the operator
+/* OperatorParameter is the structure seen in the operator
  * definitions that defines the structure of that overload.
  *
  * Example:
  *  xf 800 {X, {Y}} ++
  *
- * The OperatorVariable is identified by {X, {Y}}. The outer
- * variable is an PairVariable. Its first value is an
- * GenericVariable, whose token refers to 'X'; the second
- * value of the pair is a RestrictedVariable, whose token is 'Y'.
+ * The OperatorParameter is identified by {X, {Y}}. The outer
+ * variable is an PairParameter. Its first value is an
+ * GenericParameter, whose token refers to 'X'; the second
+ * value of the pair is a RestrictedParameter, whose token is 'Y'.
  *
  * Tuples like {X, Y, Z, W} are a shorthand to {X, {Y, {Z, W}}}.
  *
@@ -50,55 +50,55 @@ struct OperatorName : public SignatureToken {
  *      1
  *
  * This code defines 0 ! as 1. These variables are represented
- * via class NumericVariable.
+ * via class NumericParameter.
  */
-struct OperatorVariable : public SignatureToken {
-    virtual ~OperatorVariable() = default;
-    virtual OperatorVariable * clone() const override = 0;
+struct OperatorParameter : public SignatureToken {
+    virtual ~OperatorParameter() = default;
+    virtual OperatorParameter * clone() const override = 0;
 };
 
-struct NamedVariable : public OperatorVariable {
-    NamedVariable() = default;
-    NamedVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+struct NamedParameter : public OperatorParameter {
+    NamedParameter() = default;
+    NamedParameter( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual NamedVariable * clone() const override;
+    virtual NamedParameter * clone() const override;
 };
 
-struct RestrictedVariable : public OperatorVariable {
-    RestrictedVariable() = default;
-    RestrictedVariable( auto&& t ) : name(AUX_FORWARD(t)) {}
+struct RestrictedParameter : public OperatorParameter {
+    RestrictedParameter() = default;
+    RestrictedParameter( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual RestrictedVariable * clone() const override;
+    virtual RestrictedParameter * clone() const override;
 };
 
-struct NumericVariable : public OperatorVariable {
-    NumericVariable() = default;
-    NumericVariable( auto&& t, auto&& v ) :
+struct NumericParameter : public OperatorParameter {
+    NumericParameter() = default;
+    NumericParameter( auto&& t, auto&& v ) :
         name(AUX_FORWARD(t)),
         value(AUX_FORWARD(v))
     {}
     Token name;
     unsigned value;
     virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual NumericVariable * clone() const override;
+    virtual NumericParameter * clone() const override;
 };
 
-struct PairVariable : public OperatorVariable {
-    PairVariable() = default;
-    PairVariable(auto&& first, auto&& second) :
+struct PairParameter : public OperatorParameter {
+    PairParameter() = default;
+    PairParameter(auto&& first, auto&& second) :
         first(AUX_FORWARD(first)),
         second(AUX_FORWARD(second))
     {}
-    std::unique_ptr<OperatorVariable> first;
-    std::unique_ptr<OperatorVariable> second;
+    std::unique_ptr<OperatorParameter> first;
+    std::unique_ptr<OperatorParameter> second;
     virtual std::ostream& print_to( std::ostream& ) const override;
-    virtual PairVariable * clone() const override;
+    virtual PairParameter * clone() const override;
 };
 
 /* Operator bodies.
- * A PairBody is used in the same way as a PairVariable, but there
+ * A PairBody is used in the same way as a PairParameter, but there
  * is no need to use braces. Braces are used to force priority.
  * SequenceBody is used to aggregate sequential expressions.
  * To represent nesting, an element in the sequence can mean

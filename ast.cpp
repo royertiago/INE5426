@@ -14,32 +14,32 @@ OperatorName * OperatorName::clone() const {
     return new OperatorName{ name };
 }
 
-std::ostream& NamedVariable::print_to( std::ostream& os ) const {
+std::ostream& NamedParameter::print_to( std::ostream& os ) const {
     return os << "{NamedVar} " << name;
 }
-NamedVariable * NamedVariable::clone() const {
-    return new NamedVariable{ name };
+NamedParameter * NamedParameter::clone() const {
+    return new NamedParameter{ name };
 }
 
-std::ostream& RestrictedVariable::print_to( std::ostream& os ) const {
+std::ostream& RestrictedParameter::print_to( std::ostream& os ) const {
     return os << "{{RestrictedVar} " << name << '}';
 }
-RestrictedVariable * RestrictedVariable::clone() const {
-    return new RestrictedVariable{ name };
+RestrictedParameter * RestrictedParameter::clone() const {
+    return new RestrictedParameter{ name };
 }
 
-std::ostream& NumericVariable::print_to( std::ostream& os ) const {
+std::ostream& NumericParameter::print_to( std::ostream& os ) const {
     return os << "{{NumberVar} " << name << '}';
 }
-NumericVariable * NumericVariable::clone() const {
-    return new NumericVariable{ name, value };
+NumericParameter * NumericParameter::clone() const {
+    return new NumericParameter{ name, value };
 }
 
-std::ostream& PairVariable::print_to( std::ostream& os ) const {
+std::ostream& PairParameter::print_to( std::ostream& os ) const {
     return os << "{{PairVar} " << *first << ", " << *second << '}';
 }
-PairVariable * PairVariable::clone() const {
-    return new PairVariable{ first->clone(), second->clone() };
+PairParameter * PairParameter::clone() const {
+    return new PairParameter{ first->clone(), second->clone() };
 }
 
 std::ostream& PairBody::print_to( std::ostream& os ) const {

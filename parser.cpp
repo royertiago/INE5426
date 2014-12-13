@@ -19,12 +19,12 @@ namespace {
     std::unique_ptr<OperatorDefinition> parse_operator( Lexer& );
 
     /* Parse a variable definition, in operator headers. */
-    std::unique_ptr<OperatorVariable> parse_variable( Lexer& );
+    std::unique_ptr<OperatorParameter> parse_variable( Lexer& );
 
     /* Parse the sequence "comma-variable-comma-variable-comma-variable"...
      * in a variable definition that must be structured in pairs.
      * The parsing starts after a comma. */
-    std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& );
+    std::unique_ptr<OperatorParameter> parse_variable_list( Lexer& );
 
     /* Parse an operator body. */
     std::unique_ptr<OperatorBody> parse_body( Lexer& );
@@ -133,21 +133,21 @@ std::unique_ptr<OperatorDefinition> parse_operator( Lexer& alex ) {
     return std::move( ptr );
 }
 
-std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
+std::unique_ptr<OperatorParameter> parse_variable( Lexer& alex ) {
     if( alex.peek().id == Token::NUM ) {
         Token tok = alex.next();
-        return std::make_unique<NumericVariable>(tok, strtol(tok.lexeme.c_str(), 0, 10));
+        return std::make_unique<NumericParameter>(tok, strtol(tok.lexeme.c_str(), 0, 10));
     }
     if( alex.peek().id == Token::IDENTIFIER )
-        return std::make_unique<NamedVariable>(alex.next());
+        return std::make_unique<NamedParameter>(alex.next());
     if( alex.peek().id == Token::STRING )
-        return string_to_tuple<PairVariable>(alex.next());
+        return string_to_tuple<PairParameter>(alex.next());
     if( alex.peek().id != '{' )
         throw parse_error( "Variable definitions must begin with left brace", alex.peek() );
 
     Token open_brace = alex.next();
 
-    std::unique_ptr<OperatorVariable> lookahead; // Precisamos de um pouco de lookahead aqui
+    std::unique_ptr<OperatorParameter> lookahead; // Precisamos de um pouco de lookahead aqui
 
     if( alex.peek().id == '{' )
         lookahead = parse_variable( alex );
@@ -160,21 +160,21 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
         if( alex.peek().id == '}' ) {
             alex.next();
             if( tok.id == Token::IDENTIFIER )
-                return std::make_unique<RestrictedVariable>( tok );
+                return std::make_unique<RestrictedParameter>( tok );
             throw parse_error( "Number variables need not be further restricted", tok );
         }
         if( tok.id == Token::NUM )
-            lookahead = std::make_unique<NumericVariable>( tok, strtol(tok.lexeme.c_str(), 0, 10) );
+            lookahead = std::make_unique<NumericParameter>( tok, strtol(tok.lexeme.c_str(), 0, 10) );
         else if( tok.id == Token::IDENTIFIER )
-            lookahead = std::make_unique<NamedVariable>( tok );
+            lookahead = std::make_unique<NamedParameter>( tok );
         else
-            lookahead = string_to_tuple<PairVariable>( tok );
+            lookahead = string_to_tuple<PairParameter>( tok );
     }
     if( alex.peek().id != ',' )
         throw parse_error( "Expected either comma or closing brace"
                            " after identifier inside variable", alex.peek() );
     alex.next();
-    std::unique_ptr<OperatorVariable> ptr = std::make_unique<PairVariable>(
+    std::unique_ptr<OperatorParameter> ptr = std::make_unique<PairParameter>(
                                     std::move(lookahead), parse_variable_list(alex) );
 
     if( alex.peek().id != '}' )
@@ -184,8 +184,8 @@ std::unique_ptr<OperatorVariable> parse_variable( Lexer& alex ) {
     return std::move(ptr);
 }
 
-std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& alex ) {
-    std::unique_ptr<OperatorVariable> ptr = parse_variable( alex );
+std::unique_ptr<OperatorParameter> parse_variable_list( Lexer& alex ) {
+    std::unique_ptr<OperatorParameter> ptr = parse_variable( alex );
 
     if( alex.peek().id != ',' ) {
         if( alex.peek().id == '}' )
@@ -194,7 +194,7 @@ std::unique_ptr<OperatorVariable> parse_variable_list( Lexer& alex ) {
             throw parse_error( "Expected either a comma or a closing brace", alex.peek() );
     }
     alex.next();
-    return std::make_unique<PairVariable>( std::move(ptr), parse_variable_list(alex) );
+    return std::make_unique<PairParameter>( std::move(ptr), parse_variable_list(alex) );
 }
 
 std::unique_ptr<OperatorBody> parse_body( Lexer& alex ) {
