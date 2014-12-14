@@ -9,8 +9,9 @@
 #ifndef OPERATOR_H
 #define OPERATOR_H
 
-#include "printable.h"
 #include "ast.h"
+#include "exceptions.h"
+#include "printable.h"
 #include "symbol.h"
 
 #define AUX_FORWARD(var) std::forward<decltype(var)>(var)
@@ -114,17 +115,39 @@ struct OperatorBase : public Symbol {
         overloads.emplace_back( ptr );
     }
     unsigned priority;
+
+protected:
+    /* This protected function factors the brute-force out of
+     * the respective methods in derived classes.
+     *
+     * We don't expose this function directly to help with
+     * compiler error messages. */
+    template< typename ... Args >
+    std::unique_ptr<Variable> _compute( Args && ... args ) const {
+        for( const auto& ptr : overloads )
+            try {
+                return ptr->compute( std::forward<Args>(args)... );
+            } catch( semantic_error & ) {
+                // Found invalid overload.
+            }
+
+        throw semantic_error( "No valid overload found" );
+    }
 };
 
 struct NullaryOperator : public OperatorBase<NullaryOverload> {
     std::unique_ptr<Variable> compute();
     NullaryOperator( std::string name ) : OperatorBase<NullaryOverload>( name ) {}
-    std::unique_ptr<Variable> compute() const;
+    std::unique_ptr<Variable> compute() const {
+        return _compute();
+    }
 };
 struct UnaryOperator : public OperatorBase<UnaryOverload> {
     UnaryOperator( std::string name ) : OperatorBase<UnaryOverload>( name ) {}
     unsigned operand_priority;
-    std::unique_ptr<Variable> compute( std::unique_ptr<Variable>&& ) const;
+    std::unique_ptr<Variable> compute( std::unique_ptr<Variable>&& var ) const {
+        return _compute( std::move(var) );
+    }
 };
 struct BinaryOperator : public OperatorBase<BinaryOverload> {
     BinaryOperator( std::string name ) : OperatorBase<BinaryOverload>( name ) {}
@@ -132,7 +155,10 @@ struct BinaryOperator : public OperatorBase<BinaryOverload> {
     unsigned right_priority;
     std::unique_ptr<Variable> compute(
             std::unique_ptr<Variable>&& left,
-            std::unique_ptr<Variable>&& right ) const;
+            std::unique_ptr<Variable>&& right ) const
+    {
+        return _compute( std::move(left), std::move(right) );
+    }
 };
 
 #endif // OPERATOR_H
