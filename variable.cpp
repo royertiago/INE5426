@@ -2,6 +2,7 @@
  * Implementation of variable.h
  */
 #include <utility>
+#include "exceptions.h"
 #include "variable.h"
 
 Variable::Variable( std::unique_ptr<Variable>&& f, std::unique_ptr<Variable>&& s ) :
@@ -33,4 +34,22 @@ bool operator==( const Variable& lhs, const Variable& rhs ) {
                 *lhs.second == *rhs.second;
     return !rhs.first &&
         lhs.value == rhs.value;
+}
+
+void VariableTable::insert( std::string name, std::unique_ptr<Variable>&& variable ) {
+    auto pair = table.insert( std::make_pair(name, std::move(variable)) );
+    if( pair.second ) {
+        // Insertion failed: this variable exists.
+        if( *pair.first->second == *variable )
+            return; // Ok: the values are the same.
+        throw semantic_error( "Variable already inserted with different value" );
+    }
+}
+
+std::unique_ptr<Variable> VariableTable::retrieve( std::string name ) const {
+    try {
+        return table.at(name)->clone();
+    } catch( std::out_of_range & ) {
+        throw semantic_error( "Inexistent variable" );
+    }
 }
