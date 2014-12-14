@@ -12,6 +12,7 @@
 #ifndef SEMANTIC_ANALYSER_H
 #define SEMANTIC_ANALYSER_H
 
+#include <utility>
 #include "parser.h"
 
 struct SemanticAnalyser {
@@ -33,5 +34,15 @@ private:
     void compute_next();
 };
 
+/* If the line contains a valid language construct, returns a
+ * SemanticAnalyser that will parse only this single command.
+ * pair.second == nullptr in this case.
+ * Otherwise, interpret the line as a body or a nullary operator
+ * and returns a corretly built tree.
+ * In this case, pair.first == nullptr.
+ *
+ * This function is intended to be used in an interactive mode. */
+std::pair< std::unique_ptr<SemanticAnalyser>, std::unique_ptr<OperatorBody> >
+parse_single_line( std::string line );
 
 #endif // SEMANTIC_ANALYSER_H
