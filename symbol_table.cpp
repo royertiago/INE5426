@@ -5,7 +5,7 @@
 #include "exceptions.h"
 #include "symbol_table.h"
 
-namespace GlobalSymbolTable {
+namespace SymbolTable {
 
 /* Separate symbol tables for each type of symbol. */
 namespace tables {
@@ -169,7 +169,7 @@ const BinaryOperator * retrieveBinaryOperator( std::string name ) {
     return iter->second.get();
 }
 
-} // namespace GlobalSymbolTable
+} // namespace SymbolTable
 
 // Implementation of VariableList methods.
 void VariableList::insert( std::string name ) {

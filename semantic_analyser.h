@@ -4,10 +4,10 @@
  * SemanticAnalysers encapsulates a Parser and walk through
  * every semantic structure, calling tree_build.h functions
  * as needed, processing include commands, and populating
- * the GlobalSymbolTable in the process.
+ * the SymbolTable in the process.
  *
  * There should be at most one SemanticAnalyser per program,
- * as these objects modify the GlobalSymbolTable.
+ * as these objects modify the SymbolTable.
  */
 #ifndef SEMANTIC_ANALYSER_H
 #define SEMANTIC_ANALYSER_H

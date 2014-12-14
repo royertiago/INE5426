@@ -14,7 +14,7 @@
  * The symbol table stores and retrieves the symbols defined in the program;
  * namely, categories and operators.
  */
-namespace GlobalSymbolTable {
+namespace SymbolTable {
     void insertCategory( std::string name );
     bool existsCategory( std::string name );
     unsigned categoryValue( std::string name ); // assumes existsCategory
