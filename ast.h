@@ -126,8 +126,17 @@ struct PairParameter : public OperatorParameter {
  * SequenceBody and TerminalBody are used in the parsing only; semantical
  * analysis take care of changing all of these to VariableBody (a named
  * reference to a local variable), NumericBody (a number constant) and
- * TreeNodeBody (a reference to an operator and its arguments). */
+ * TreeNodeBody (a reference to an operator and its arguments).
+ *
+ * The evaluation of a variable under the operator body is done by the
+ * method 'evaluate'. This method is called after all Variable matching
+ * and decomposition is done, so the operator may assume every needed
+ * variable is present.
+ *
+ * Calling SequenceBody::evaluate or TerminalBody::evaluate raises an exception.
+ */
 struct OperatorBody : public Printable {
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable& ) const = 0;
     virtual ~OperatorBody() = default;
     virtual OperatorBody * clone() const override = 0;
 };
@@ -141,11 +150,13 @@ struct PairBody : public OperatorBody {
     std::unique_ptr<OperatorBody> first;
     std::unique_ptr<OperatorBody> second;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual PairBody * clone() const override;
 };
 
 struct SequenceBody : public OperatorBody {
     std::vector< std::unique_ptr<OperatorBody> > sequence;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual SequenceBody * clone() const override;
 };
@@ -154,6 +165,7 @@ struct TerminalBody : public OperatorBody {
     TerminalBody() = default;
     TerminalBody( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual TerminalBody * clone() const override;
 };
@@ -164,6 +176,7 @@ struct VariableBody : public OperatorBody {
     VariableBody() = default;
     VariableBody( auto&& n ) : name(AUX_FORWARD(n)) {}
     std::string name;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual VariableBody * clone() const override;
 };
@@ -172,6 +185,7 @@ struct NumericBody : public OperatorBody {
     NumericBody() = default;
     NumericBody( auto&& v ) : value(AUX_FORWARD(v)) {}
     int value;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NumericBody * clone() const override;
 };
@@ -185,6 +199,7 @@ struct TreeNodeBody : public OperatorBody {
      * Since each pointer points to a different object type,
      * it is better to mantain the pointer in each derived class
      * rendering this class empty. */
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const = 0;
     virtual TreeNodeBody * clone() const override = 0;
 };
 
@@ -192,6 +207,7 @@ struct NullaryTreeBody : public TreeNodeBody {
     NullaryTreeBody() = default;
     NullaryTreeBody( auto&& op ) : op(AUX_FORWARD(op)) {}
     const NullaryOperator * op;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NullaryTreeBody * clone() const override;
 };
@@ -203,6 +219,7 @@ struct UnaryTreeBody : public TreeNodeBody {
     {}
     const UnaryOperator * op;
     std::unique_ptr<OperatorBody> variable;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual UnaryTreeBody * clone() const override;
 };
@@ -215,6 +232,7 @@ struct BinaryTreeBody : public TreeNodeBody {
     {}
     const BinaryOperator * op;
     std::unique_ptr<OperatorBody> left, right;
+    virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual BinaryTreeBody * clone() const override;
 };
