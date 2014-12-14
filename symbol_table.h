@@ -1,5 +1,6 @@
 /* symbol_table.h
- * Class definition of the symbol table and declaration of the global symbol table.
+ * Namespace that aggregates the functions that manipulate
+ * the global symbol table.
  */
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
