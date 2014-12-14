@@ -15,6 +15,7 @@
 #define VARIABLE_H
 
 #include <memory>
+#include <iosfwd>
 #include <string>
 #include <unordered_map>
 
@@ -49,6 +50,9 @@ struct Variable {
 /* Returns true if the objects are of the same type
  * and share the same value, false otherwise. */
 bool operator==( const Variable& lhs, const Variable& rhs );
+
+/* Prints the variable to the specified output stream. */
+std::ostream & operator<<( std::ostream&, const Variable& );
 
 /* Class that mantains a list of variables and its names.
  * It is used in variable decomposition, done during overload selection. */

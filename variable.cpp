@@ -1,6 +1,7 @@
 /* variable.cpp
  * Implementation of variable.h
  */
+#include <ostream>
 #include <utility>
 #include "exceptions.h"
 #include "variable.h"
@@ -34,6 +35,11 @@ bool operator==( const Variable& lhs, const Variable& rhs ) {
                 *lhs.second == *rhs.second;
     return !rhs.first &&
         lhs.value == rhs.value;
+}
+
+std::ostream& operator<<( std::ostream & os, const Variable& var ) {
+    if( var.first ) return os << '{' << *var.first << ", " << *var.second << '}';
+    return os << var.value;
 }
 
 void VariableTable::insert( std::string name, std::unique_ptr<Variable>&& variable ) {
