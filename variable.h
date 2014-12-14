@@ -14,7 +14,6 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <utility> // std::move
 
 struct Variable {
     std::unique_ptr<Variable> first;
@@ -23,19 +22,11 @@ struct Variable {
         long long value; // active is first == nullptr
     };
 
-    Variable( std::unique_ptr<Variable>&& f, std::unique_ptr<Variable>&& s ) :
-        first( std::move(f) ),
-        second( std::move(s) )
-    {}
+    Variable( std::unique_ptr<Variable>&& f, std::unique_ptr<Variable>&& s );
 
-    explicit Variable( long long value ) :
-        first( nullptr ),
-        value( value )
-    {}
+    explicit Variable( long long value );
 
-    ~Variable() {
-        if( first ) second.reset();
-    }
+    ~Variable();
 
     /* Due to the complexity added by the union, it is easier
      * to simply disallow copies, moves and assignments. */
@@ -44,23 +35,10 @@ struct Variable {
     Variable & operator=( const Variable & ) = delete;
     Variable & operator=( Variable && ) = delete;
 
-    std::unique_ptr<Variable> clone() const {
-        if( !first ) return std::make_unique<Variable>( value );
-        return std::make_unique<Variable>(
-                std::move( first->clone() ),
-                std::move( second->clone() )
-            );
-    }
+    std::unique_ptr<Variable> clone() const;
 };
 
-bool operator==( const Variable& lhs, const Variable& rhs ) {
-    if( lhs.first )
-        return rhs.first &&
-                *lhs.first == *rhs.first &&
-                *lhs.second == *rhs.second;
-    return !rhs.first &&
-        lhs.value == rhs.value;
-}
+bool operator==( const Variable& lhs, const Variable& rhs );
 
 /* Class that mantains a list of variables and its names.
  * It is used in variable decomposition, done during overload selection. */
