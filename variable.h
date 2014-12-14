@@ -12,6 +12,8 @@
 #define VARIABLE_H
 
 #include <memory>
+#include <string>
+#include <unordered_map>
 #include <utility> // std::move
 
 struct Variable {
@@ -60,4 +62,19 @@ bool operator==( const Variable& lhs, const Variable& rhs ) {
         lhs.value == rhs.value;
 }
 
+/* Class that mantains a list of variables and its names.
+ * It is used in variable decomposition, done during overload selection. */
+class VariableTable {
+    std::unordered_map< std::string, std::unique_ptr<Variable> > table;
+
+public:
+    /* Inserts a variable in the table.
+     * If the variable exists in the table and the stored value is the
+     * same, this method silently ignores the insertion.
+     * Otherwise, semantic_error is thrown. */
+    void insert( std::string name, std::unique_ptr<Variable>&& variable );
+
+    /* Returns a clone of the specified variable. */
+    std::unique_ptr<Variable> retrieve( std::string name ) const;
+};
 #endif // VARIABLE_H
