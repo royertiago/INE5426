@@ -10,6 +10,7 @@
 #include "operator_fwd.h"
 #include "printable.h"
 #include "token.h"
+#include "variable.h"
 
 #define AUX_FORWARD(var) std::forward<decltype(var)>(var)
 
@@ -30,15 +31,16 @@ struct OperatorName : public SignatureToken {
     virtual OperatorName * clone() const override;
 };
 
-/* OperatorParameter is the structure seen in the operator
- * definitions that defines the structure of that overload.
+/* OperatorParameter is the part of the signature of operator definitions
+ * that specifies a matching pattern that the variables accepted
+ * by that overload must conform.
  *
  * Example:
  *  xf 800 {X, {Y}} ++
  *
  * The OperatorParameter is identified by {X, {Y}}. The outer
- * variable is an PairParameter. Its first value is an
- * GenericParameter, whose token refers to 'X'; the second
+ * variable is a PairParameter. Its first value is an
+ * NamedParameter, whose token refers to 'X'; the second
  * value of the pair is a RestrictedParameter, whose token is 'Y'.
  *
  * Tuples like {X, Y, Z, W} are a shorthand to {X, {Y, {Z, W}}}.
@@ -50,10 +52,22 @@ struct OperatorName : public SignatureToken {
  *      1
  *
  * This code defines 0 ! as 1. These variables are represented
- * via class NumericParameter.
+ * by the class NumericParameter.
+ *
+ * Unlike the class hierarchy below OperatorBody, the parsing
+ * of these clases is done enirely during syntactical analysis.
+ *
+ * After parsing, the validation of variables against the matching pattern
+ * and the decomposition of valid variables in the existing names
+ * is done by the method 'decompose'.
+ * The inputs to this method are a Variable and a reference to a
+ * VariableTable. If the Variable matches the pattern, the table
+ * is populated with the respective parts of the Variable.
+ * In the event of a failed match, an semantic_error is thrown.
  */
 struct OperatorParameter : public SignatureToken {
     virtual ~OperatorParameter() = default;
+    virtual void decompose( const Variable&, VariableTable& ) const = 0;
     virtual OperatorParameter * clone() const override = 0;
 };
 
@@ -62,6 +76,7 @@ struct NamedParameter : public OperatorParameter {
     NamedParameter( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual void decompose( const Variable&, VariableTable& ) const;
     virtual NamedParameter * clone() const override;
 };
 
@@ -70,6 +85,7 @@ struct RestrictedParameter : public OperatorParameter {
     RestrictedParameter( auto&& t ) : name(AUX_FORWARD(t)) {}
     Token name;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual void decompose( const Variable&, VariableTable& ) const;
     virtual RestrictedParameter * clone() const override;
 };
 
@@ -82,6 +98,7 @@ struct NumericParameter : public OperatorParameter {
     Token name;
     unsigned value;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual void decompose( const Variable&, VariableTable& ) const;
     virtual NumericParameter * clone() const override;
 };
 
@@ -94,6 +111,7 @@ struct PairParameter : public OperatorParameter {
     std::unique_ptr<OperatorParameter> first;
     std::unique_ptr<OperatorParameter> second;
     virtual std::ostream& print_to( std::ostream& ) const override;
+    virtual void decompose( const Variable&, VariableTable& ) const;
     virtual PairParameter * clone() const override;
 };
 
