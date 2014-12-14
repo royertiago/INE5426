@@ -4,7 +4,9 @@
  * from Printable.
  */
 #include <ostream>
+#include <utility>
 #include "ast.h"
+#include "exceptions.h"
 #include "operator.h"
 
 // OperatorName
@@ -22,6 +24,9 @@ std::ostream& NamedParameter::print_to( std::ostream& os ) const {
 NamedParameter * NamedParameter::clone() const {
     return new NamedParameter{ name };
 }
+void NamedParameter::decompose( const Variable& var, VariableTable& table ) const {
+    table.insert( name.lexeme, std::move(var.clone()) );
+}
 
 // RestrictedParameter
 std::ostream& RestrictedParameter::print_to( std::ostream& os ) const {
@@ -29,6 +34,10 @@ std::ostream& RestrictedParameter::print_to( std::ostream& os ) const {
 }
 RestrictedParameter * RestrictedParameter::clone() const {
     return new RestrictedParameter{ name };
+}
+void RestrictedParameter::decompose( const Variable& var, VariableTable& table ) const {
+    if( !var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
+    table.insert( name.lexeme, std::move(var.clone()) );
 }
 
 // NumericParameter
@@ -38,6 +47,11 @@ std::ostream& NumericParameter::print_to( std::ostream& os ) const {
 NumericParameter * NumericParameter::clone() const {
     return new NumericParameter{ name, value };
 }
+void NumericParameter::decompose( const Variable& var, VariableTable& ) const {
+    if( !var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
+    if( var.value != value ) throw semantic_error( "Unmatched value" );
+    // NumericParameter is a mere matching Parameter.
+}
 
 // PairParameter
 std::ostream& PairParameter::print_to( std::ostream& os ) const {
@@ -45,6 +59,10 @@ std::ostream& PairParameter::print_to( std::ostream& os ) const {
 }
 PairParameter * PairParameter::clone() const {
     return new PairParameter{ first->clone(), second->clone() };
+}
+void PairParameter::decompose( const Variable& var, VariableTable& table ) const {
+    first->decompose( var, table );
+    second->decompose( var, table );
 }
 
 // PairBody
