@@ -7,6 +7,9 @@
  * between a pointer and a integer. If the first pointer is null,
  * then the active member of the union is the integer, otherwise
  * is the pointer that is the active member.
+ *
+ * Since the active member is set at construction, this information
+ * should not change in the execution of the program.
  */
 #ifndef VARIABLE_H
 #define VARIABLE_H
@@ -22,10 +25,14 @@ struct Variable {
         long long value; // active is first == nullptr
     };
 
+    /* Move-constructs first and second. */
     Variable( std::unique_ptr<Variable>&& f, std::unique_ptr<Variable>&& s );
 
+    /* Set first = nullptr and initializes value. */
     explicit Variable( long long value );
 
+    /* The destructor is not the default because we have a union
+     * and we must call the destructor of second conditionally. */
     ~Variable();
 
     /* Due to the complexity added by the union, it is easier
@@ -35,9 +42,12 @@ struct Variable {
     Variable & operator=( const Variable & ) = delete;
     Variable & operator=( Variable && ) = delete;
 
+    /* Returns a deep copy of this object. */
     std::unique_ptr<Variable> clone() const;
 };
 
+/* Returns true if the objects are of the same type
+ * and share the same value, false otherwise. */
 bool operator==( const Variable& lhs, const Variable& rhs );
 
 /* Class that mantains a list of variables and its names.
