@@ -35,6 +35,13 @@ struct Variable {
         if( first ) second.reset();
     }
 
+    /* Due to the complexity added by the union, it is easier
+     * to simply disallow copies, moves and assignments. */
+    Variable( const Variable & ) = delete;
+    Variable( Variable && ) = delete;
+    Variable & operator=( const Variable & ) = delete;
+    Variable & operator=( Variable && ) = delete;
+
 };
 
 #endif // VARIABLE_H
