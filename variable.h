@@ -12,6 +12,7 @@
 #define VARIABLE_H
 
 #include <memory>
+#include <utility> // std::move
 
 struct Variable {
     std::unique_ptr<Variable> first;
@@ -19,6 +20,21 @@ struct Variable {
         std::unique_ptr<Variable> second; // active if first != nullptr
         long long value; // active is first == nullptr
     };
+
+    Variable( std::unique_ptr<Variable>&& f, std::unique_ptr<Variable>&& s ) :
+        first( std::move(f) ),
+        second( std::move(s) )
+    {}
+
+    explicit Variable( long long value ) :
+        first( nullptr ),
+        value( value )
+    {}
+
+    ~Variable() {
+        if( first ) second.reset();
+    }
+
 };
 
 #endif // VARIABLE_H
