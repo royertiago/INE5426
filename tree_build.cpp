@@ -185,7 +185,7 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
 {
     if( body.name.id == Token::NUM )
         return std::make_unique<NumericBody>(
-                std::strtol( body.name.lexeme.c_str(), 0, 10 ) // porque foda-se o Melga
+                std::strtoll( body.name.lexeme.c_str(), 0, 10 ) // porque foda-se o Melga
         );
     if( table.contains( body.name.lexeme ) )
         return std::make_unique<VariableBody>( body.name.lexeme );

@@ -184,7 +184,7 @@ struct VariableBody : public OperatorBody {
 struct NumericBody : public OperatorBody {
     NumericBody() = default;
     NumericBody( auto&& v ) : value(AUX_FORWARD(v)) {}
-    int value;
+    long long value;
     virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NumericBody * clone() const override;
