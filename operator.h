@@ -32,6 +32,13 @@
  *
  * Note that there is no need of differentiating beetween prefix
  * and postfix: each node has a pointer to its version of the operator.
+ *
+ * The evaluation of each overload is done by calling a method
+ * named 'compute' in each class, that have a signature according
+ * to its type.
+ * The method 'compute' first decompose the variable using the 'decompose'
+ * method from the classes below OperatorParameter. These methods might
+ * fail; in this case, a semantic_error is thrown.
  */
 struct OperatorOverload : public Statement {
     OperatorOverload() = default;
@@ -56,7 +63,7 @@ struct NullaryOverload : public OperatorOverload {
     NullaryOverload( auto&& n, auto&& b ) :
         OperatorOverload( AUX_FORWARD(n), AUX_FORWARD(b) )
     {}
-    // There is no signature.
+    std::unique_ptr<Variable> compute() const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual NullaryOverload * clone() const override;
 };
@@ -68,6 +75,7 @@ struct UnaryOverload : public OperatorOverload {
         variable( AUX_FORWARD(v) )
     {}
     std::unique_ptr<OperatorParameter> variable;
+    std::unique_ptr<Variable> compute( std::unique_ptr<Variable>&& ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual UnaryOverload * clone() const override;
 };
@@ -80,10 +88,20 @@ struct BinaryOverload : public OperatorOverload {
     {}
     std::unique_ptr<OperatorParameter> left;
     std::unique_ptr<OperatorParameter> right;
+    std::unique_ptr<Variable> compute(
+            std::unique_ptr<Variable>&& left,
+            std::unique_ptr<Variable>&& right ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual BinaryOverload * clone() const override;
 };
 
+/* Finally, we can construct Operators as sets of Overloads.
+ *
+ * Each operator have a 'compute' method, analog to its
+ * Overload counterpart. Here, the operator attempts each
+ * overload in insertion order until some operator correctly
+ * returns, or raises an exception (a semantic_error) if
+ * no valid overload is found. */
 template <typename Overload>
 struct OperatorBase : public Symbol {
     OperatorBase( std::string name ) : Symbol( name ) {}
@@ -99,16 +117,22 @@ struct OperatorBase : public Symbol {
 };
 
 struct NullaryOperator : public OperatorBase<NullaryOverload> {
+    std::unique_ptr<Variable> compute();
     NullaryOperator( std::string name ) : OperatorBase<NullaryOverload>( name ) {}
+    std::unique_ptr<Variable> compute() const;
 };
 struct UnaryOperator : public OperatorBase<UnaryOverload> {
     UnaryOperator( std::string name ) : OperatorBase<UnaryOverload>( name ) {}
     unsigned operand_priority;
+    std::unique_ptr<Variable> compute( std::unique_ptr<Variable>&& ) const;
 };
 struct BinaryOperator : public OperatorBase<BinaryOverload> {
     BinaryOperator( std::string name ) : OperatorBase<BinaryOverload>( name ) {}
     unsigned left_priority;
     unsigned right_priority;
+    std::unique_ptr<Variable> compute(
+            std::unique_ptr<Variable>&& left,
+            std::unique_ptr<Variable>&& right ) const;
 };
 
 #endif // OPERATOR_H
