@@ -72,6 +72,12 @@ std::ostream& PairBody::print_to( std::ostream& os ) const {
 PairBody * PairBody::clone() const {
     return new PairBody{ first->clone(), second->clone() };
 }
+std::unique_ptr<Variable> PairBody::evaluate( const VariableTable& table ) const {
+    auto lptr = std::move( first->evaluate(table) );
+    auto rptr = std::move( second->evaluate(table) );
+    return std::make_unique<Variable>( std::move(lptr), std::move(rptr) );
+    // step-by-step evaluation guarantees left-to-right evaluation.
+}
 
 // SequenceBody
 std::ostream& SequenceBody::print_to( std::ostream& os ) const {
@@ -86,6 +92,9 @@ SequenceBody * SequenceBody::clone() const {
         ret->sequence.emplace_back( ptr->clone() );
     return ret;
 }
+std::unique_ptr<Variable> SequenceBody::evaluate( const VariableTable& ) const {
+    throw std::logic_error( "SequenceBody::evaluate called" );
+}
 
 // TerminalBody
 std::ostream& TerminalBody::print_to( std::ostream& os ) const {
@@ -93,6 +102,9 @@ std::ostream& TerminalBody::print_to( std::ostream& os ) const {
 }
 TerminalBody * TerminalBody::clone() const {
     return new TerminalBody{ name };
+}
+std::unique_ptr<Variable> TerminalBody::evaluate( const VariableTable& ) const {
+    throw std::logic_error( "TerminalBody::evaluate called" );
 }
 
 // VariableBody
@@ -102,6 +114,9 @@ std::ostream& VariableBody::print_to( std::ostream& os ) const {
 VariableBody * VariableBody::clone() const {
     return new VariableBody{ name };
 }
+std::unique_ptr<Variable> VariableBody::evaluate( const VariableTable& table ) const {
+    return table.retrieve(name);
+}
 
 // NumericBody
 std::ostream& NumericBody::print_to( std::ostream& os ) const {
@@ -109,6 +124,9 @@ std::ostream& NumericBody::print_to( std::ostream& os ) const {
 }
 NumericBody * NumericBody::clone() const {
     return new NumericBody{ value };
+}
+std::unique_ptr<Variable> NumericBody::evaluate( const VariableTable& ) const {
+    return std::make_unique<Variable>( value );
 }
 
 // NullaryTreeBody
@@ -118,6 +136,9 @@ std::ostream& NullaryTreeBody::print_to( std::ostream& os ) const {
 NullaryTreeBody * NullaryTreeBody::clone() const {
     return new NullaryTreeBody{ op }; // note there is no 'clone'
 }
+std::unique_ptr<Variable> NullaryTreeBody::evaluate( const VariableTable& ) const {
+    return op->compute();
+}
 
 // UnaryTreeBody
 std::ostream& UnaryTreeBody::print_to( std::ostream& os ) const {
@@ -126,6 +147,9 @@ std::ostream& UnaryTreeBody::print_to( std::ostream& os ) const {
 UnaryTreeBody * UnaryTreeBody::clone() const {
     return new UnaryTreeBody{ op, variable->clone() };
 }
+std::unique_ptr<Variable> UnaryTreeBody::evaluate( const VariableTable& table ) const {
+    return op->compute( variable->evaluate( table ) );
+}
 
 // BinaryTreeBody
 std::ostream& BinaryTreeBody::print_to( std::ostream& os ) const {
@@ -133,6 +157,11 @@ std::ostream& BinaryTreeBody::print_to( std::ostream& os ) const {
 }
 BinaryTreeBody * BinaryTreeBody::clone() const {
     return new BinaryTreeBody{ op, left->clone(), right->clone() };
+}
+std::unique_ptr<Variable> BinaryTreeBody::evaluate( const VariableTable& table ) const {
+    auto lptr = std::move( left->evaluate(table) );
+    auto rptr = std::move( right->evaluate(table) );
+    return op->compute( std::move(lptr), std::move(rptr) );
 }
 
 // IncludeCommand
