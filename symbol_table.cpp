@@ -171,16 +171,16 @@ const BinaryOperator * retrieveBinaryOperator( std::string name ) {
 
 } // namespace GlobalSymbolTable
 
-// Implementation of LocalSymbolTable methods.
-void LocalSymbolTable::insert( std::string name ) {
+// Implementation of VariableList methods.
+void VariableList::insert( std::string name ) {
     table.insert( name );
 }
 
-bool LocalSymbolTable::contains( std::string name ) const {
+bool VariableList::contains( std::string name ) const {
     return table.count( name ) != 0;
 }
 
-LocalSymbolTable & LocalSymbolTable::merge( const LocalSymbolTable & other ) {
+VariableList & VariableList::merge( const VariableList & other ) {
     table.insert( other.table.begin(), other.table.end() );
     return *this;
 }

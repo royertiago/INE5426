@@ -13,23 +13,23 @@ namespace {
     /* Builds the expression tree of the given operator body, changing every
      * SequenceBody and TerminalBody to suitable instances of VariableBody,
      * NumericBody and TreeNodeBody. */
-    std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody&, const LocalSymbolTable& );
+    std::unique_ptr<OperatorBody> buildExpressionTree( const OperatorBody&, const VariableList& );
 
     /* Aggregates all the variables' names used inside the passed OperatorParameter. */
-    LocalSymbolTable collectVariables( const OperatorParameter & );
+    VariableList collectVariables( const OperatorParameter & );
 
 } // anonymous namespace
 
 std::unique_ptr<NullaryOverload> buildNullaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<NullaryOverload>();
-    ptr->body = std::move( buildExpressionTree(*def.body, LocalSymbolTable()) );
+    ptr->body = std::move( buildExpressionTree(*def.body, VariableList()) );
     ptr->name = static_cast<const OperatorName&>(*def.names[0]).name.lexeme;
     return std::move( ptr );
 }
 
 std::unique_ptr<UnaryOverload> buildUnaryTree( const OperatorDefinition& def ) {
     auto ptr = std::make_unique<UnaryOverload>();
-    LocalSymbolTable table;
+    VariableList table;
     if( def.format[0] == 'f' ) {
         ptr->variable.reset(static_cast<const OperatorParameter&>(*def.names[1]).clone());
         table = collectVariables( static_cast<const OperatorParameter&>(*def.names[1]) );
@@ -58,12 +58,12 @@ std::unique_ptr<BinaryOverload> buildBinaryTree( const OperatorDefinition& def )
 namespace {
 typedef std::unique_ptr<OperatorBody> (*ExpressionTreeBuilder)(
         const OperatorBody&,
-        const LocalSymbolTable&
+        const VariableList&
     );
 
 std::unique_ptr<OperatorBody> buildExpressionPairBody(
         const PairBody& body,
-        const LocalSymbolTable& table )
+        const VariableList& table )
 {
     return std::make_unique<PairBody>(
             std::move( buildExpressionTree( *body.first,  table ) ),
@@ -73,7 +73,7 @@ std::unique_ptr<OperatorBody> buildExpressionPairBody(
 
 std::unique_ptr<OperatorBody> buildExpressionSequenceBody(
         const SequenceBody& body,
-        const LocalSymbolTable& table )
+        const VariableList& table )
 {
     struct Data {
         std::unique_ptr< OperatorBody > data = nullptr;
@@ -181,7 +181,7 @@ end_external_loop:;
 
 std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
         const TerminalBody& body,
-        const LocalSymbolTable& table )
+        const VariableList& table )
 {
     if( body.name.id == Token::NUM )
         return std::make_unique<NumericBody>(
@@ -204,7 +204,7 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
     {                                                                                               \
         std::type_index(typeid(type)),                                                              \
         static_cast<ExpressionTreeBuilder>(                                                         \
-            []( const OperatorBody& body, const LocalSymbolTable& table ) {                         \
+            []( const OperatorBody& body, const VariableList& table ) {                             \
                 return std::move(buildExpression##type( dynamic_cast<const type&>(body), table));   \
             }                                                                                       \
         )                                                                                           \
@@ -212,7 +212,7 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
 
 std::unique_ptr<OperatorBody> buildExpressionTree(
         const OperatorBody& body,
-        const LocalSymbolTable& table )
+        const VariableList& table )
 {
     std::unordered_map<std::type_index, ExpressionTreeBuilder> functions = {
         AUX_TYPE(PairBody),
@@ -222,16 +222,16 @@ std::unique_ptr<OperatorBody> buildExpressionTree(
     return std::move( functions.at(std::type_index(typeid(body)))(body, table) );
 }
 
-typedef void(* InsertorFunction )( const OperatorParameter &, LocalSymbolTable & );
+typedef void(* InsertorFunction )( const OperatorParameter &, VariableList & );
 
-void insertVariables( const OperatorParameter & var, LocalSymbolTable & table ) {
+void insertVariables( const OperatorParameter & var, VariableList & table ) {
     // A 'switch-case' with types
     static std::unordered_map<std::type_index, InsertorFunction > jump_table =
     {
         {
             std::type_index(typeid(NamedParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                []( const OperatorParameter & var, VariableList & table ) {
                     auto & nvar = dynamic_cast<const NamedParameter&>(var);
                     table.insert( nvar.name.lexeme );
                 })
@@ -239,7 +239,7 @@ void insertVariables( const OperatorParameter & var, LocalSymbolTable & table ) 
         {
             std::type_index(typeid(RestrictedParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                []( const OperatorParameter & var, VariableList & table ) {
                     auto & nvar = dynamic_cast<const RestrictedParameter&>(var);
                     table.insert( nvar.name.lexeme );
                 })
@@ -247,14 +247,14 @@ void insertVariables( const OperatorParameter & var, LocalSymbolTable & table ) 
         {
             std::type_index(typeid(NumericParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorParameter &, LocalSymbolTable & ) {
+                []( const OperatorParameter &, VariableList & ) {
                     // We do not need to save numbers in the symbol table.
                 })
         },
         {
             std::type_index(typeid(PairParameter)),
             static_cast<InsertorFunction>(
-                []( const OperatorParameter & var, LocalSymbolTable & table ) {
+                []( const OperatorParameter & var, VariableList & table ) {
                     auto & nvar = dynamic_cast<const PairParameter&>(var);
                     insertVariables( *nvar.first, table );
                     insertVariables( *nvar.second, table );
@@ -264,8 +264,8 @@ void insertVariables( const OperatorParameter & var, LocalSymbolTable & table ) 
     jump_table.at(typeid(var))( var, table );
 }
 
-LocalSymbolTable collectVariables( const OperatorParameter & var ) {
-    LocalSymbolTable table;
+VariableList collectVariables( const OperatorParameter & var ) {
+    VariableList table;
     insertVariables( var, table );
     return table;
 }

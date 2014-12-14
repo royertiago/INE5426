@@ -53,8 +53,8 @@ namespace GlobalSymbolTable {
     const BinaryOperator * retrieveBinaryOperator( std::string name );
 }
 
-/* Local symbol table used to store the operator variables. */
-class LocalSymbolTable {
+/* Local symbol table used to store the operator parameters. */
+class VariableList {
     std::set< std::string > table;
 
 public:
@@ -63,6 +63,6 @@ public:
 
     /* Joins two local symbol tables.
      * Returns *this. */
-    LocalSymbolTable& merge( const LocalSymbolTable & );
+    VariableList& merge( const VariableList & );
 };
 #endif // SYMBOL_TABLE_H
