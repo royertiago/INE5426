@@ -51,4 +51,13 @@ struct Variable {
     }
 };
 
+bool operator==( const Variable& lhs, const Variable& rhs ) {
+    if( lhs.first )
+        return rhs.first &&
+                *lhs.first == *rhs.first &&
+                *lhs.second == *rhs.second;
+    return !rhs.first &&
+        lhs.value == rhs.value;
+}
+
 #endif // VARIABLE_H
