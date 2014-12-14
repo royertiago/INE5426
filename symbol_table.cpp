@@ -14,6 +14,8 @@ namespace tables {
     std::unordered_map<std::string, std::unique_ptr<UnaryOperator>> postfix;
     std::unordered_map<std::string, std::unique_ptr<UnaryOperator>> prefix;
     std::unordered_map<std::string, std::unique_ptr<BinaryOperator>> binary;
+
+    NullaryOperator * lastInserted = nullptr;
 } // namespace tables
 
 void insertCategory( std::string name ) {
@@ -41,6 +43,7 @@ void insertOverload( std::string name, std::string format,
 
         NullaryOperator & op = *tables::nullary[name];
         op.insert( std::move(overload) );
+        tables::lastInserted = &op;
 
         if( !operator_exists )
             op.priority = priority;
@@ -167,6 +170,10 @@ const BinaryOperator * retrieveBinaryOperator( std::string name ) {
     if( iter == tables::binary.end() )
         return nullptr;
     return iter->second.get();
+}
+
+const NullaryOperator * lastNullaryInserted() {
+    return tables::lastInserted;
 }
 
 } // namespace SymbolTable

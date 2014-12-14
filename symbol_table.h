@@ -52,6 +52,15 @@ namespace SymbolTable {
     const UnaryOperator * retrievePrefixOperator( std::string name );
     const UnaryOperator * retrievePostfixOperator( std::string name );
     const BinaryOperator * retrieveBinaryOperator( std::string name );
+
+    /* Returns the last nullary operator inserted, or nullptr if
+     * none was inserted.
+     *
+     * Language semantics says that the last operator should be nullary
+     * and this is the operator that will be executed to test program
+     * validity.
+     * We will assume that the last operator is a nullary one. */
+    const NullaryOperator * lastNullaryInserted();
 }
 
 /* Local symbol table used to store the operator parameters. */
