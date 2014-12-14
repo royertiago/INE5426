@@ -42,6 +42,13 @@ struct Variable {
     Variable & operator=( const Variable & ) = delete;
     Variable & operator=( Variable && ) = delete;
 
+    std::unique_ptr<Variable> clone() const {
+        if( !first ) return std::make_unique<Variable>( value );
+        return std::make_unique<Variable>(
+                std::move( first->clone() ),
+                std::move( second->clone() )
+            );
+    }
 };
 
 #endif // VARIABLE_H
