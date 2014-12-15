@@ -1,9 +1,22 @@
 #include <cstring>
 #include <iostream>
 #include "lexer.h"
+#include "native.h"
 #include "parser.h"
 #include "semantic_analyser.h"
 #include "symbol_table.h"
+
+#define LAMBDAOP(op) [](auto x, auto y){ return x op y; }
+
+void insert_natives() {
+    SymbolTable::insertCategory( "false" );
+    SymbolTable::insertCategory( "true" );
+    insertNative( "__+", "xfy", 800, LAMBDAOP(+) );
+    insertNative( "__-", "xfy", 800, LAMBDAOP(-) );
+    insertNative( "__*", "xfy", 600, LAMBDAOP(*) );
+    insertNative( "__/", "xfy", 600, LAMBDAOP(/) );
+    insertNative( "__%", "xfy", 600, LAMBDAOP(%) );
+}
 
 void lexical_analysis( const char * filename ) {
     Lexer alex( filename );
@@ -80,6 +93,8 @@ void interactive() {
 }
 
 int main( int argc, char * argv[] ) {
+    insert_natives();
+
     if( argc == 1 ) {
         interactive();
         return 0;
