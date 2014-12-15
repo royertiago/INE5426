@@ -43,7 +43,7 @@ std::ostream& operator<<( std::ostream & os, const Variable& var ) {
 }
 
 void VariableTable::insert( std::string name, std::unique_ptr<Variable>&& variable ) {
-    auto pair = table.insert( std::make_pair(name, std::move(variable)) );
+    auto pair = table.insert( std::make_pair(name, variable->clone()) );
     if( pair.second ) {
         // Insertion failed: this variable exists.
         if( *pair.first->second == *variable )
