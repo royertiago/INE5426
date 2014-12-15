@@ -63,7 +63,28 @@ void run_program( const char * filename ) {
     std::cout << *SymbolTable::lastNullaryInserted()->compute() << std::endl;
 }
 
+void interactive() {
+    std::cout << "Type EOF (ctrl-D on Bash) to quit\n";
+    std::string str;
+    while( std::getline(std::cin, str) )
+        try {
+            auto pair = parse_single_line( str );
+            if( pair.second )
+                std::cout << *pair.second->evaluate( VariableTable() ) << std::endl;
+            if( pair.first )
+                while( pair.first->has_next() )
+                    pair.first->next();
+        } catch ( std::exception & ex ) {
+            std::cout << "Found an error: " << ex.what() << std::endl;
+        }
+}
+
 int main( int argc, char * argv[] ) {
+    if( argc == 1 ) {
+        interactive();
+        return 0;
+    }
+
     if( argc == 2 ) {
         if( strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0 ) {
             std::cout << "Usage: " << argv[0] << " [-l | -p | -s | -r] <filename>\n"
@@ -73,7 +94,8 @@ int main( int argc, char * argv[] ) {
                          "  -p, --parser    Do syntactic analysis on the program.\n"
                          "  -s, --semantic  Do semantical analysis on the program.\n"
                          "  -r, --run       Run the program. This is the default.\n"
-                         "  -h, --help      Display this help and quit.\n";
+                         "  -h, --help      Display this help and quit.\n"
+                         "If no argument is provided, run in interactive mode.\n";
             return 0;
         }
         run_program( argv[1] );
