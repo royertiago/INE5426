@@ -6,9 +6,9 @@
 #include "semantic_analyser.h"
 #include "symbol_table.h"
 
-void SemanticAnalyser::set_parser( std::unique_ptr<Parser>&& parser ) {
-    _current_parser = std::move(parser);
-}
+SemanticAnalyser::SemanticAnalyser( std::unique_ptr<Parser>&& parser ) :
+    _current_parser( std::move(parser) )
+{}
 
 std::unique_ptr<Statement> SemanticAnalyser::next() {
     if( !_next )

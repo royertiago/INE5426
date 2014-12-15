@@ -16,7 +16,8 @@
 #include "parser.h"
 
 struct SemanticAnalyser {
-    void set_parser( std::unique_ptr<Parser>&& );
+    SemanticAnalyser() = default;
+    SemanticAnalyser( std::unique_ptr<Parser>&& parser );
 
     std::unique_ptr<Statement> next();
 

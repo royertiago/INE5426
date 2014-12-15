@@ -28,9 +28,7 @@ void syntactic_analysis( const char * filename ) {
 }
 
 void semantic_analysis( const char * filename ) {
-    auto parser_ptr = std::make_unique<Parser>( filename );
-    SemanticAnalyser semantic_analyser;
-    semantic_analyser.set_parser( std::move(parser_ptr) );
+    SemanticAnalyser semantic_analyser( std::make_unique<Parser>(filename) );
     while( semantic_analyser.has_next() )
         try {
             std::cout << *semantic_analyser.next() << '\n';
@@ -43,8 +41,7 @@ void semantic_analysis( const char * filename ) {
 }
 
 void run_program( const char * filename ) {
-    SemanticAnalyser analyser;
-    analyser.set_parser( std::make_unique<Parser>(filename) );
+    SemanticAnalyser analyser( std::make_unique<Parser>(filename) );
     bool errors = false;
     while( analyser.has_next() )
         try {
