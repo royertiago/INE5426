@@ -76,10 +76,11 @@ std::pair< std::unique_ptr<SemanticAnalyser>, std::unique_ptr<OperatorBody> >
                 std::make_unique<SemanticAnalyser>( std::make_unique<Parser>(std::move(line)) ),
                 std::unique_ptr<OperatorBody>(nullptr)
         );
-    SemanticAnalyser analyser( std::make_unique<Parser>("f 0 dummy " + line) );
-    auto ptr = analyser.next();
 
-    OperatorDefinition * op = dynamic_cast<OperatorDefinition *>( ptr.get() );
+    Parser parser( "f 0 dummy " + line );
+    auto ptr = parser.next();
+
+    auto * op = dynamic_cast<OperatorDefinition *>( ptr.get() );
     if( !op )
         throw semantic_error( "No valid parsing found" );
 
