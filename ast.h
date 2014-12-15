@@ -134,11 +134,6 @@ struct PairParameter : public OperatorParameter {
  * variable is present.
  *
  * Calling SequenceBody::evaluate or TerminalBody::evaluate raises an exception.
- *
- * There is a hook to permit the use of underlying implementation's
- * instructions in programs of this language - the NativeOperation.
- * This allows input/output and "fast" implementation of sums
- * and subtractions.
  */
 struct OperatorBody : public Printable {
     virtual std::unique_ptr<Variable> evaluate( const VariableTable& ) const = 0;
@@ -240,15 +235,6 @@ struct BinaryTreeBody : public TreeNodeBody {
     virtual std::unique_ptr<Variable> evaluate( const VariableTable & ) const;
     virtual std::ostream& print_to( std::ostream& ) const override;
     virtual BinaryTreeBody * clone() const override;
-};
-
-struct NativeOperation : public OperatorBody {
-    /* a NativeOperation may assume that the variable table
-     * will contain a variable named 'arg', whose evaluation
-     * under this OperatorBody is requested. */
-    virtual std::unique_ptr<Variable> evaluate( const VariableTable& ) = 0;
-    virtual ~NativeOperation() = default;
-    virtual OperatorBody * clone() const override = 0;
 };
 
 /* A statement is the basic structure of the program.
