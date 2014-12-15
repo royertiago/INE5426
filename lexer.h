@@ -26,6 +26,9 @@ struct Lexer {
      */
     Lexer( const char * filename );
 
+    /* Constructs a lexer to scan a string. */
+    Lexer( std::string&& data );
+
     /* Reads the current token and advances the state of the lexer.
      * Returns an invalid result (a token with null id) if has_next()
      * returns false. */

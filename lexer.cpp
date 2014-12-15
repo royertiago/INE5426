@@ -110,3 +110,16 @@ Lexer::Lexer( const char * filename ) :
 
     compute_next();
 }
+
+Lexer::Lexer( std::string&& str ) :
+    _file( new std::string(std::move(str)) )
+{
+    init();
+
+    position_iterator<std::string::iterator> iter( _file->begin() );
+    position_iterator<std::string::iterator> end( _file->end() );
+
+    _results = lexertl::match_results<decltype(iter)>( iter, end );
+
+    compute_next();
+}
