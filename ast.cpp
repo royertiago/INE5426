@@ -36,7 +36,7 @@ RestrictedParameter * RestrictedParameter::clone() const {
     return new RestrictedParameter{ name };
 }
 void RestrictedParameter::decompose( const Variable& var, VariableTable& table ) const {
-    if( !var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
+    if( var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
     table.insert( name.lexeme, std::move(var.clone()) );
 }
 
