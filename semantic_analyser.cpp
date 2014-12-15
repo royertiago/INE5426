@@ -64,3 +64,27 @@ void SemanticAnalyser::compute_next() {
         throw;
     }
 }
+
+// GAMBIARRRRA
+std::pair< std::unique_ptr<SemanticAnalyser>, std::unique_ptr<OperatorBody> >
+    parse_single_line( std::string line )
+{
+    Lexer lex(( std::string(line) )); // move a copy
+    // Most vexing parse rule...
+    if( Token::declarator(lex.peek()) )
+        return std::make_pair(
+                std::make_unique<SemanticAnalyser>( std::make_unique<Parser>(std::move(line)) ),
+                std::unique_ptr<OperatorBody>(nullptr)
+        );
+    SemanticAnalyser analyser( std::make_unique<Parser>("f 0 dummy " + line) );
+    auto ptr = analyser.next();
+
+    OperatorDefinition * op = dynamic_cast<OperatorDefinition *>( ptr.get() );
+    if( !op )
+        throw semantic_error( "No valid parsing found" );
+
+    return std::make_pair(
+                std::unique_ptr<SemanticAnalyser>(nullptr),
+                std::move(buildNullaryTree(*op)->body)
+        );
+}
