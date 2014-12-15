@@ -195,6 +195,9 @@ std::unique_ptr<OperatorBody> buildExpressionTerminalBody(
                 SymbolTable::retrieveNullaryOperator(body.name.lexeme)
             );
 
+    if( SymbolTable::existsCategory(body.name.lexeme) )
+        return std::make_unique<NumericBody>( SymbolTable::categoryValue(body.name.lexeme));
+
     throw semantic_error( "Terminal " + body.name.lexeme + "is not a number,"
             " a variable or a unary operator." );
 }
