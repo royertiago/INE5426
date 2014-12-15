@@ -6,9 +6,9 @@
 #include "semantic_analyser.h"
 #include "symbol_table.h"
 
-SemanticAnalyser::SemanticAnalyser( std::unique_ptr<Parser>&& parser ) :
-    _current_parser( std::move(parser) )
-{}
+SemanticAnalyser::SemanticAnalyser( std::unique_ptr<Parser>&& parser ) {
+    parser_stack.emplace( std::move(parser) );
+}
 
 std::unique_ptr<Statement> SemanticAnalyser::next() {
     if( !_next )
@@ -23,14 +23,22 @@ const Statement * SemanticAnalyser::peek() {
 }
 
 bool SemanticAnalyser::has_next() const {
-    return _current_parser && _current_parser->has_next();
+    return !parser_stack.empty() && parser_stack.top()->has_next();
 }
 
 void SemanticAnalyser::compute_next() {
     try {
-        auto ptr = _current_parser->next();
+        auto ptr = parser_stack.top()->next();
+
+        if( !parser_stack.top()->has_next() )
+            parser_stack.pop();
 
         if( typeid(*ptr) != typeid(OperatorDefinition) ) {
+            if( auto include = dynamic_cast<IncludeCommand *>(ptr.get()) ) {
+                parser_stack.emplace(
+                        std::make_unique<Parser>(include->filename.lexeme.c_str())
+                    );
+            }
             _next = std::move( ptr );
             return;
         }
@@ -50,7 +58,7 @@ void SemanticAnalyser::compute_next() {
                 std::move(std::unique_ptr<OperatorOverload>(op.clone())) );
     }
     catch ( parse_error & err ) {
-        _current_parser->panic();
+        parser_stack.top()->panic();
         throw;
     }
 }

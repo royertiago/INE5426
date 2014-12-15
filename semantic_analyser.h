@@ -13,6 +13,7 @@
 #define SEMANTIC_ANALYSER_H
 
 #include <utility>
+#include <stack>
 #include "parser.h"
 
 struct SemanticAnalyser {
@@ -30,7 +31,7 @@ struct SemanticAnalyser {
     bool has_next() const;
 
 private:
-    std::unique_ptr<Parser> _current_parser;
+    std::stack<std::unique_ptr<Parser>> parser_stack;
     std::unique_ptr<Statement> _next;
     void compute_next();
 };
