@@ -16,6 +16,7 @@
 
 struct Parser {
     Parser( const char * filename );
+    Parser( std::string&& );
 
     /* The unique pointer ownership is transferred. */
     std::unique_ptr<Statement> next();

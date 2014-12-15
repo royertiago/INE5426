@@ -41,6 +41,11 @@ Parser::Parser( const char * filename ) :
     _next( nullptr )
 {}
 
+Parser::Parser( std::string&& str ) :
+    _alex( std::move(str) ),
+    _next( nullptr )
+{}
+
 std::unique_ptr<Statement> Parser::next() {
     if( !_next )
         compute_next();
