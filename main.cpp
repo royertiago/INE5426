@@ -56,7 +56,7 @@ void run_program( const char * filename ) {
         }
 
     if( errors ) {
-        std::cerr << "Aborting due to programming errors.";
+        std::cerr << "Aborting due to programming errors.\n";
         return;
     }
 
