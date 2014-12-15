@@ -48,7 +48,7 @@ NumericParameter * NumericParameter::clone() const {
     return new NumericParameter{ name, value };
 }
 void NumericParameter::decompose( const Variable& var, VariableTable& ) const {
-    if( !var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
+    if( var.first ) throw semantic_error( name.lexeme + " needs to be a number" );
     if( var.value != value ) throw semantic_error( "Unmatched value" );
     // NumericParameter is a mere matching Parameter.
 }
