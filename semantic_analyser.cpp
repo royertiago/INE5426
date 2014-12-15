@@ -39,6 +39,8 @@ void SemanticAnalyser::compute_next() {
                         std::make_unique<Parser>(include->filename.lexeme.c_str())
                     );
             }
+            if( auto category = dynamic_cast<CategoryDefinition *>(ptr.get()) )
+                SymbolTable::insertCategory(category->name.lexeme );
             _next = std::move( ptr );
             return;
         }
