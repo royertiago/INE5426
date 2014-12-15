@@ -1,0 +1,60 @@
+Sample program: peano arithmetic
+
+include examples/increment
+include examples/decrement
+
+Equality
+xfx 1000 X == X
+    1
+xfx 1000 X == Y
+    0
+
+Sum
+xfy 800 X + 0
+    X
+xfy 800 X + Y
+    ++ X + -- Y
+
+Product
+xfy 600 X * 0
+    0
+xfy 600 X * Y
+    X * -- Y + X
+
+Order
+xfx 1000 0 <= Y
+    1
+xfx 1000 X <= 0
+    0
+xfx 1000 X <= Y
+    -- X <= -- Y
+
+Inverse order
+xfx 1000 X >= Y
+    Y <= X
+
+Extension: exponentiation
+xfy 300 X ^ 0
+    1
+xfy 300 X ^ Y
+    X ^ -- Y * X
+
+Extension: boolean operators
+xfy 1100 0 && Y
+    0
+xfy 1100 X && 0
+    0
+xfy 1100 X && Y
+    1
+
+xfy 1100 0 || 0
+    0
+xfy 1100 X || Y
+    1
+
+
+f 0 a
+    {   2 ^ 3 ^ 0 >= 2 &&
+        {2 ^ 3} ^ 0 <= 1 &&
+        2 ^ 3 == 8
+    } || 2 ^ 5 <= 31
